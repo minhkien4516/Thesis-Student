@@ -4,6 +4,9 @@ import databaseConfig from './database/database.config';
 import { HealthModule } from './health/health.module';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionsLoggerFilter } from './utils/exceptionsLogger.filter';
+import { DatabaseModule } from './database/database.module';
+import { RésumeModule } from './domain/Services/résume/résume.module';
+import { SkillModule } from './domain/Services/skill/skill.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { ExceptionsLoggerFilter } from './utils/exceptionsLogger.filter';
       load: [databaseConfig],
     }),
     HealthModule,
+    DatabaseModule,
+    RésumeModule,
+    SkillModule,
   ],
   providers: [
     {

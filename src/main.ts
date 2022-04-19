@@ -10,10 +10,10 @@ async function bootstrap() {
   await app.startAllMicroservices();
 
   const config = new DocumentBuilder()
-    .setTitle('Corporation Service')
-    .setDescription('The Corporation Service API description')
+    .setTitle('Student Service')
+    .setDescription('The Student Service API description')
     .setVersion('1.0')
-    .addTag('corporations')
+    .addTag('students')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
