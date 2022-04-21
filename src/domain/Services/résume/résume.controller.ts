@@ -18,6 +18,7 @@ import { RésumeService } from './résume.service';
 import {
   GetAllForOwnerResponse,
   RésumeFilter,
+  RésumeFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
 import { defaultTimeout } from '../../../constants/timeout.constant';
@@ -69,6 +70,48 @@ export class RésumeController {
     try {
       const result = await this.résumeService.UpdateRésume(id, updateRésumeDto);
       return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('student')
+  async GetResumeForClient(
+    @Query('id') id: string,
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ): Promise<RésumeFilterResponse> {
+    if (id.trim() == '') return { data: [], pagination: { total: 0 } };
+    try {
+      const data = await this.résumeService.getResumeByStudentId(
+        id,
+        limit,
+        offset,
+      );
+      console.log(data[0].id);
+
+      const { files } = await this.getImages(data[0].id);
+      Object.values(data)[0].images = files;
+      const total = await this.résumeService.getTotalResumeByStudentId(id);
+      if (Object.values(total)[0] > 0 && data.length > 0) {
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant =
+              await this.résumeService.getAllDataForResumeByResumeId(item.id);
+            item.details = relevant;
+            console.log(item.details);
+
+            return item.details;
+          }),
+        );
+        return { data, pagination: total };
+      }
+
+      return { data: [], pagination: { total: 0 } };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

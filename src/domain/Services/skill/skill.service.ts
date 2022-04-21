@@ -43,7 +43,9 @@ export class SkillService {
     }
   }
 
-  public async addJobSkill(addResumeSkillDto: AddResumeSkillDto): Promise<any> {
+  public async addResumeSkill(
+    addResumeSkillDto: AddResumeSkillDto,
+  ): Promise<any> {
     try {
       const inserted = await this.sequelize.query(
         'SP_AddResumeSkill @cvId=:cvId,@skillsId=:skillsId',

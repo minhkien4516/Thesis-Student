@@ -74,4 +74,81 @@ export class RésumeService {
       throw new DatabaseError(error);
     }
   }
+
+  public async getResumeByStudentId(
+    id: string,
+    limit: number,
+    offset: number,
+  ): Promise<RésumeFilter[]> {
+    try {
+      if (limit < 1 || offset < 0) return [];
+      const resume: RésumeFilter[] = await this.sequelize.query(
+        'SP_GetFullResumeForStudentById @id=:id, @limit=:limit, @offset=:offset',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            limit,
+            offset,
+          },
+        },
+      );
+      return resume;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+  async getTotalResumeByStudentId(id: string) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetTotalCVForStudentById @id=:id ',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Résume,
+        },
+      );
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getAllDataForResumeByResumeId(id: string) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetAllDataForCVByStudentId @cvId=:id',
+        {
+          type: QueryTypes.RAW,
+          replacements: {
+            id,
+          },
+          raw: true,
+        },
+      );
+      if (
+        typeof Object.keys(total) == null ||
+        typeof Object.keys(total) == 'undefined' ||
+        !total[0].length
+      )
+        return total[0];
+      {
+        const info: string = total[0]
+          .map((each: string) => {
+            return Object.values(each)[0];
+          })
+          .reduce((acc: string, curr: string) => acc + curr, '');
+        return JSON.parse(info);
+      }
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
 }

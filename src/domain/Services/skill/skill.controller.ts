@@ -28,7 +28,7 @@ export class SkillController {
         addNewSkillsDto.skills.map(async (item) => {
           const skill = await this.skillService.addNewSkill(item);
           console.log(skill);
-          await this.skillService.addJobSkill({
+          await this.skillService.addResumeSkill({
             skillsId: skill.id,
             cvId,
           });
