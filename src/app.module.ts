@@ -1,3 +1,4 @@
+import { UniversityModule } from './domain/Services/university/university.module';
 import { CertificatedModule } from './domain/Services/certificated/certificated.module';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { ProjectModule } from './domain/Services/project/project.module';
     }),
     HealthModule,
     DatabaseModule,
+    UniversityModule,
     RésumeModule,
     SkillModule,
     ContactModule,
