@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  university-service:
+    container_name: university-service
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+      - DB_HOST=host.docker.internal
+      - DB_PORT=1401
+      # - DB_HOST=db-final.cdublfjfuteq.ap-southeast-1.rds.amazonaws.com
+      # - DB_PORT=1433
+      - DB_USERNAME=sa
+      # - DB_PASSWORD=abc!123ABC
+      - DB_PASSWORD=abc@12345
+      - DB_NAME=University_Service_Db
+    # depends_on:
+    #   # - mssql-db
+    #   - redis-cache
+    ports:
+      - 3001:3001
+    restart: unless-stopped
+    # links:
+    # - mssql-db
+    mem_limit: 128m
+    cpus: 0.2
+    # networks:
+    #   - development
+  # mssql-db:
+  #   container_name: mssql-db
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   volumes:
+  #     - ~/apps/mssql/data:/var/lib/mssqlql/data
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=abc@12345
+  #   healthcheck:
+  #     test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ""$$SA_PASSWORD"" -Q "SELECT 1" || exit 1
+  #     timeout: 45s
+  #     interval: 10s
+  #     retries: 10
+  #   mem_limit: 1Gb
+  #   cpus: 0.2
+  #   ports:
+  #     - 1401:1433
+  #   networks:
+  #     - development
+# networks:
+#   development:
+#     driver: bridge
+# volumes:
+# mssql-db:
+#   driver: local
+

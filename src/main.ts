@@ -10,10 +10,10 @@ async function bootstrap() {
   await app.startAllMicroservices();
 
   const config = new DocumentBuilder()
-    .setTitle('Student Service')
-    .setDescription('The Student Service API description')
+    .setTitle('University Service')
+    .setDescription('The University Service API description')
     .setVersion('1.0')
-    .addTag('students')
+    .addTag('university')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -21,5 +21,5 @@ async function bootstrap() {
   console.log(await app.getUrl());
 }
 bootstrap().then(() =>
-  console.log(`Student server is running on port ${process.env.PORT}`),
+  console.log(`University server is running on port ${process.env.PORT}`),
 );
