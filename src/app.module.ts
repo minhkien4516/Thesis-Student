@@ -27,6 +27,7 @@ import { ProjectModule } from './domain/Services/project/project.module';
     ContactModule,
     CertificatedModule,
     ProjectModule,
+    UniversityModule,
   ],
   providers: [
     {

@@ -18,11 +18,17 @@ import { FilesService } from '../files/files.service';
 import { UniversityService } from './university.service';
 import {
   GetAllForOwnerResponse,
+  StudentsFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
 import { defaultTimeout } from '../../../constants/timeout.constant';
 import * as XLSX from 'xlsx';
-import { AddNewStudentsDto } from './dtos/addNewStudents.dtos';
+import {
+  AddNewStudentsByImportDto,
+  AddNewStudentsDto,
+} from './dtos/addNewStudents.dtos';
+import { UpdateStudentDto } from './dtos/updateStudent.dtos';
+import { FilterStudentDto } from './dtos/filterStudent.dtos';
 
 @Controller('university')
 export class UniversityController {
@@ -33,9 +39,9 @@ export class UniversityController {
     private readonly fileService: FilesService,
   ) {}
 
-  @Post('student')
+  @Post('import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
-  public async AddNewStudent(
+  public async AddNewStudentByImport(
     @UploadedFiles() files: { files?: Express.Multer.File },
   ) {
     try {
@@ -54,7 +60,7 @@ export class UniversityController {
       });
       const multiStudent = await Promise.all(
         jsonData.map(async (student) => {
-          const dto = new AddNewStudentsDto();
+          const dto = new AddNewStudentsByImportDto();
           dto.class = student['Lớp'];
           dto.birthDate = student['Ngày sinh'];
           dto.identityNumber = student['Mã số SV'];
@@ -78,6 +84,138 @@ export class UniversityController {
         }),
       );
       return multiStudent;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Post('student')
+  public async addNewStudents(@Body() dto: AddNewStudentsDto) {
+    try {
+      const multiStudent = await Promise.all(
+        dto.students.map(async (student) => {
+          const students = await this.universityService.addNewStudent(student);
+          return students[0];
+        }),
+      );
+      return multiStudent;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Patch('student')
+  public async updateStudentInformation(
+    @Query('id') id: string,
+    @Body() dto: UpdateStudentDto,
+  ) {
+    try {
+      const result = await this.universityService.UpdateStudentInformation(
+        id,
+        dto,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('student/identityNumber')
+  public async getAllIdentityNumber() {
+    try {
+      const result =
+        await this.universityService.getAllIdentityNumberForClient();
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+  @Get('student/all')
+  public async GetAllStudentsInUniversity(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ): Promise<StudentsFilterResponse> {
+    try {
+      const data = await this.universityService.getAllStudentForClient(
+        limit,
+        offset,
+      );
+      const total =
+        await this.universityService.getTotalStudentsInUniversityForClient();
+      if (Object.values(total)[0] > 0 && data.length > 0) {
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant =
+              await this.universityService.getAllDataForStudentByStudentId(
+                item.id,
+              );
+            console.log(typeof Object.keys(relevant)[0]);
+            if (typeof Object.keys(relevant)[0] == 'undefined') {
+              return (item.details = []);
+            } else if (typeof Object.keys(relevant)[0] == 'string') {
+              item.details = [relevant];
+              const { files } = await this.getImages(item.details[0].cv[0].id);
+              item.details[0].cv[0].images = files;
+              return {
+                details: item.details,
+                images: item.details[0].cv[0].images,
+              };
+            }
+          }),
+        );
+        return { data, pagination: total };
+      }
+      return { data: [], pagination: { total: 0 } };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('student/filter')
+  public async getStudentByConditions(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+    @Query() filterStudentDto: FilterStudentDto,
+  ): Promise<StudentsFilterResponse> {
+    try {
+      console.log(filterStudentDto);
+      // const optionals = new FilterStudentDto();
+      // const dto = { ...optionals, ...filterStudentDto };
+      const data = await this.universityService.getFilterStudentByConditions(
+        limit,
+        offset,
+        {
+          ...filterStudentDto,
+        },
+      );
+      const total =
+        await this.universityService.getTotalFilterStudentByConditions({
+          ...filterStudentDto,
+        });
+
+      if (Object.values(total)[0] < 0 && data.length < 0)
+        return { data: [], pagination: { total: 0 } };
+      return { data, pagination: total };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

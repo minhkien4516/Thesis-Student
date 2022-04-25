@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class AddNewStudentsDto {
+export class AddNewStudentsByImportDto {
   @IsString()
   @IsNotEmpty()
   firstName?: string | null;
@@ -48,4 +48,8 @@ export class AddNewStudentsDto {
   @IsNumber()
   @IsNotEmpty()
   phoneNumber?: string | null;
+}
+
+export class AddNewStudentsDto {
+  students: [AddNewStudentsByImportDto];
 }

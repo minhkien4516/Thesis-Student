@@ -37,12 +37,17 @@ export class RésumeController {
   @Post()
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
   public async addNewRésume(
+    @Query('studentId') studentId: string,
     @Body() addNewRésume: AddNewRésumeDto,
     @UploadedFiles() files: { files?: Express.Multer.File[] },
   ): Promise<RésumeFilter[]> {
     try {
       const result = await this.résumeService.addNewRésume({
         ...addNewRésume,
+      });
+      await this.résumeService.addStudentResume({
+        cvId: Object.values(result)[0].id,
+        studentId,
       });
       await this.uploadImages(Object.values(result)[0].id, files.files);
       await Promise.all(

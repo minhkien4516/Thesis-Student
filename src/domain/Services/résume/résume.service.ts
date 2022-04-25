@@ -1,3 +1,4 @@
+import { AddStudentResumeDto } from './dtos/addStudentResume.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes, DatabaseError } from 'sequelize';
@@ -43,32 +44,71 @@ export class RésumeService {
     }
   }
 
-  async UpdateRésume(id: string, updateRésumeDto?: UpdateRésumeDto) {
+  public async addStudentResume(
+    addStudentResumeDto: AddStudentResumeDto,
+  ): Promise<any> {
     try {
-      if (!updateRésumeDto.studentName) return {};
-      const slug = slugify(updateRésumeDto.studentName, {
-        lower: true,
-        trim: true,
-        replacement: '-',
-      });
-      const updated = await this.sequelize.query(
-        'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
+      const inserted = await this.sequelize.query(
+        'SP_AddStudentResume @cvId=:cvId,@studentId=:studentId',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            id,
-            studentName: updateRésumeDto?.studentName?.trim() ?? null,
-            position: updateRésumeDto?.position ?? null,
-            content: updateRésumeDto?.content ?? null,
-
-            slug,
+            ...addStudentResumeDto,
           },
           raw: true,
-          mapToModel: true,
-          model: Résume,
         },
       );
-      return updated[0];
+      console.log(inserted);
+      return inserted[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async UpdateRésume(id: string, updateRésumeDto?: UpdateRésumeDto) {
+    try {
+      if (!updateRésumeDto.studentName) {
+        const updated = await this.sequelize.query(
+          'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
+          {
+            type: QueryTypes.SELECT,
+            replacements: {
+              id,
+              studentName: updateRésumeDto?.studentName?.trim() ?? null,
+              position: updateRésumeDto?.position ?? null,
+              content: updateRésumeDto?.content ?? null,
+            },
+            raw: true,
+            mapToModel: true,
+            model: Résume,
+          },
+        );
+        return updated[0];
+      } else {
+        const slug = slugify(updateRésumeDto.studentName, {
+          lower: true,
+          trim: true,
+          replacement: '-',
+        });
+        const updated = await this.sequelize.query(
+          'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
+          {
+            type: QueryTypes.SELECT,
+            replacements: {
+              id,
+              studentName: updateRésumeDto?.studentName?.trim() ?? null,
+              position: updateRésumeDto?.position ?? null,
+              content: updateRésumeDto?.content ?? null,
+              slug,
+            },
+            raw: true,
+            mapToModel: true,
+            model: Résume,
+          },
+        );
+        return updated[0];
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);
