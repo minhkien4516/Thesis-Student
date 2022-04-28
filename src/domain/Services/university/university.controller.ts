@@ -118,6 +118,12 @@ export class UniversityController {
     @Body() dto: UpdateStudentDto,
   ) {
     try {
+      dto.email = (dto.identityNumber.toLowerCase() + '@gmail.com').toString();
+      dto.term = dto.academicYear =
+        'K' +
+        (
+          parseInt(dto.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
+        ).toString();
       const result = await this.universityService.UpdateStudentInformation(
         id,
         dto,
@@ -198,9 +204,6 @@ export class UniversityController {
     @Query() filterStudentDto: FilterStudentDto,
   ): Promise<StudentsFilterResponse> {
     try {
-      console.log(filterStudentDto);
-      // const optionals = new FilterStudentDto();
-      // const dto = { ...optionals, ...filterStudentDto };
       const data = await this.universityService.getFilterStudentByConditions(
         limit,
         offset,
