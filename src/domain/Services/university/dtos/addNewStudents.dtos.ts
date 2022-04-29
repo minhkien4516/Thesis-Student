@@ -45,7 +45,7 @@ export class AddNewStudentsByImportDto {
   @IsNotEmpty()
   address?: string | null;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   phoneNumber?: string | null;
 }
