@@ -68,7 +68,7 @@ export class UniversityController {
           dto.firstName = student['Tên'];
           dto.address = student['Địa chỉ'];
           dto.email = (
-            student['Mã số SV'].toLowerCase() + '@gmail.com'
+            student['Mã số SV'].toLowerCase() + '@st.huflit.edu.vn'
           ).toString();
           dto.term = dto.academicYear =
             'K' +
@@ -118,12 +118,18 @@ export class UniversityController {
     @Body() dto: UpdateStudentDto,
   ) {
     try {
-      dto.email = (dto.identityNumber.toLowerCase() + '@gmail.com').toString();
-      dto.term = dto.academicYear =
-        'K' +
-        (
-          parseInt(dto.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
-        ).toString();
+      // dto.identityNumber != null ||
+      // dto.identityNumber != undefined ||
+      // dto.identityNumber != ''
+      //   ? (dto.email = (
+      //       dto.identityNumber.toLowerCase() + '@st.huflit.edu.vn'
+      //     ).toString())
+      //   : (dto.identityNumber = null);
+      // dto.term = dto.academicYear =
+      //   'K' +
+      //   (
+      //     parseInt(dto.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
+      //   ).toString();
       const result = await this.universityService.UpdateStudentInformation(
         id,
         dto,
