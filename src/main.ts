@@ -35,9 +35,9 @@ async function bootstrap() {
       }`,
     );
     console.log(
-      `Please combine (ctrl+click) to this link ${
+      `Please combine (ctrl+click) to this link "${
         url + '/health'
-      } for check health service ^^!`,
+      }" for check health service ^^!`,
     );
   })();
 
