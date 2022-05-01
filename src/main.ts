@@ -30,9 +30,15 @@ async function bootstrap() {
     const api = await ngrok.getApi();
     const tunnels = await api.listTunnels();
     console.log(
-      `University local server is publicly-accessible at ${url + '/health'}`,
+      `University local server is publicly-accessible at ${
+        Object.values(tunnels)[0][0].public_url
+      }`,
     );
-    console.log(Object.values(tunnels)[0][0].public_url);
+    console.log(
+      `Please combine (ctrl+click) to this link ${
+        url + '/health'
+      } for check health service ^^!`,
+    );
   })();
 
   console.log(await app.getUrl());
