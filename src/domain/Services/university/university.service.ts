@@ -64,15 +64,6 @@ export class UniversityService {
     updateStudentDto?: UpdateStudentDto,
   ) {
     try {
-      if (!updateStudentDto.firstName || !updateStudentDto.lastName) return [];
-      const slug = slugify(
-        updateStudentDto.lastName + '-' + updateStudentDto.firstName,
-        // {
-        //   lower: true,
-        //   trim: true,
-        //   replacement: '-',
-        // },
-      );
       const updated = await this.sequelize.query(
         'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
@@ -81,9 +72,9 @@ export class UniversityService {
           type: QueryTypes.SELECT,
           replacements: {
             id,
-            firstName: updateStudentDto?.firstName.trim() ?? null,
-            lastName: updateStudentDto?.lastName.trim() ?? null,
-            fullName: updateStudentDto?.fullName.trim() ?? null,
+            firstName: updateStudentDto.firstName?.trim() ?? null,
+            lastName: updateStudentDto.lastName?.trim() ?? null,
+            fullName: updateStudentDto.fullName?.trim() ?? null,
             email: updateStudentDto.email ?? null,
             birthDate: updateStudentDto.birthDate ?? null,
             identityNumber: updateStudentDto.identityNumber ?? null,
@@ -93,12 +84,15 @@ export class UniversityService {
             term: updateStudentDto.term ?? null,
             status: updateStudentDto.status ?? null,
             academicYear: updateStudentDto.academicYear ?? null,
-            slug,
+            slug: updateStudentDto.slug ?? null,
           },
           raw: true,
           mapToModel: true,
           model: Student,
         },
+      );
+      updated[0].slug = slugify(
+        updated[0].lastName + '-' + updated[0].firstName,
       );
       return updated[0];
     } catch (error) {
@@ -216,11 +210,11 @@ export class UniversityService {
         {
           type: QueryTypes.SELECT,
           replacements: {
-            fullName: filterStudentDto.fullName.trim(),
+            fullName: filterStudentDto.fullName.trim() ?? null,
             limit,
             offset,
-            identityNumber: filterStudentDto.identityNumber,
-            status: filterStudentDto.status,
+            identityNumber: filterStudentDto.identityNumber ?? null,
+            status: filterStudentDto.status ?? null,
           },
           raw: true,
         },

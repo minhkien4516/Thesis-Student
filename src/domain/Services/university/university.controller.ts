@@ -66,7 +66,7 @@ export class UniversityController {
           dto.identityNumber = student['Mã số SV'];
           dto.lastName = student['Họ và tên đệm'] || '';
           dto.firstName = student['Tên'] || '';
-          dto.fullName = dto.lastName.concat(' ', dto.firstName);
+          dto.fullName = dto.lastName.concat('', dto.firstName);
           dto.address = student['Địa chỉ'];
           dto.email = (
             student['Mã số SV'].toLowerCase() + '@st.huflit.edu.vn'
@@ -99,14 +99,19 @@ export class UniversityController {
     try {
       const multiStudent = await Promise.all(
         dto.students.map(async (student) => {
-          student.fullName = student.lastName.concat(' ', student.firstName);
+          student.fullName =
+            student.lastName.concat(' ', student.firstName) || ' ';
           student.term = student.academicYear =
             'K' +
+              (
+                parseInt(
+                  student.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0],
+                ) + 6
+              ).toString() || '';
+          student.email =
             (
-              parseInt(
-                student.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0],
-              ) + 6
-            ).toString();
+              student.identityNumber.toLowerCase() + '@st.huflit.edu.vn'
+            ).toString() || '';
           const students = await this.universityService.addNewStudent(student);
           return students[0];
         }),
@@ -127,19 +132,8 @@ export class UniversityController {
     @Body() dto: UpdateStudentDto,
   ) {
     try {
-      // dto.identityNumber != null ||
-      // dto.identityNumber != undefined ||
-      // dto.identityNumber != ''
-      //   ? (dto.email = (
-      //       dto.identityNumber.toLowerCase() + '@st.huflit.edu.vn'
-      //     ).toString())
-      //   : (dto.identityNumber = null);
-      // dto.term = dto.academicYear =
-      //   'K' +
-      //   (
-      //     parseInt(dto.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
-      //   ).toString();
-      dto.fullName = dto.lastName.concat(' ', dto.firstName);
+      dto.fullName =
+        dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
       const result = await this.universityService.UpdateStudentInformation(
         id,
         dto,

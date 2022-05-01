@@ -97,12 +97,10 @@ export class RésumeController {
         limit,
         offset,
       );
-      console.log(data[0].id);
-
-      const { files } = await this.getImages(data[0].id);
-      Object.values(data)[0].images = files;
       const total = await this.résumeService.getTotalResumeByStudentId(id);
       if (Object.values(total)[0] > 0 && data.length > 0) {
+        const { files } = await this.getImages(data[0].id);
+        Object.values(data)[0].images = files;
         await Promise.all(
           data.map(async (item) => {
             const relevant =

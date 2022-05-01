@@ -3,22 +3,14 @@ import { IsOptional, IsString, MaxLength, IsNumber } from 'class-validator';
 export class FilterStudentDto {
   @IsOptional()
   @IsString()
-  identityNumber?: string;
+  identityNumber?: string | null;
 
   @IsOptional()
   @IsString()
-  fullName?: string;
+  fullName?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(13)
-  status?: string;
-  // constructor() {
-  //   this.identityNumber = null;
-  //   this.firstName = null;
-  //   this.limit = null;
-  //   this.offset = null;
-  //   this.lastName = null;
-  //   this.status = null;
-  // }
+  status?: string | null;
 }

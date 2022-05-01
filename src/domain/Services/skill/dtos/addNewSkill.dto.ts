@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class AddNewSkillDto {
   @IsString()
@@ -11,6 +11,7 @@ export class AddNewSkillDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   slug?: string | null;
 }
 

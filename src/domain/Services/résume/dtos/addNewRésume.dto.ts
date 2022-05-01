@@ -12,4 +12,8 @@ export class AddNewRésumeDto {
   @IsOptional()
   @IsString()
   content?: string | null;
+
+  @IsString()
+  @IsOptional()
+  slug?: string | null;
 }

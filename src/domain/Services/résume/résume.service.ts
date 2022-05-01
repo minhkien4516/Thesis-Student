@@ -2,7 +2,7 @@ import { AddStudentResumeDto } from './dtos/addStudentResume.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes, DatabaseError } from 'sequelize';
-import slugify from 'slugify';
+import slugify from 'vietnamese-slug';
 import { AddNewRésumeDto } from './dtos/addNewRésume.dto';
 import { RésumeFilter } from '../../interfaces';
 import { UpdateRésumeDto } from './dtos/updateRésume.dto';
@@ -68,47 +68,25 @@ export class RésumeService {
 
   async UpdateRésume(id: string, updateRésumeDto?: UpdateRésumeDto) {
     try {
-      if (!updateRésumeDto.studentName) {
-        const updated = await this.sequelize.query(
-          'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
-          {
-            type: QueryTypes.SELECT,
-            replacements: {
-              id,
-              studentName: updateRésumeDto?.studentName?.trim() ?? null,
-              position: updateRésumeDto?.position ?? null,
-              content: updateRésumeDto?.content ?? null,
-            },
-            raw: true,
-            mapToModel: true,
-            model: Résume,
+      const updated = await this.sequelize.query(
+        'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            studentName: updateRésumeDto?.studentName?.trim() ?? null,
+            position: updateRésumeDto?.position ?? null,
+            content: updateRésumeDto?.content ?? null,
+            slug: updateRésumeDto?.slug ?? null,
           },
-        );
-        return updated[0];
-      } else {
-        const slug = slugify(updateRésumeDto.studentName, {
-          lower: true,
-          trim: true,
-          replacement: '-',
-        });
-        const updated = await this.sequelize.query(
-          'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
-          {
-            type: QueryTypes.SELECT,
-            replacements: {
-              id,
-              studentName: updateRésumeDto?.studentName?.trim() ?? null,
-              position: updateRésumeDto?.position ?? null,
-              content: updateRésumeDto?.content ?? null,
-              slug,
-            },
-            raw: true,
-            mapToModel: true,
-            model: Résume,
-          },
-        );
-        return updated[0];
-      }
+          raw: true,
+          mapToModel: true,
+          model: Résume,
+        },
+      );
+
+      updated[0].slug = slugify(updated[0].studentName);
+      return updated[0];
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);
