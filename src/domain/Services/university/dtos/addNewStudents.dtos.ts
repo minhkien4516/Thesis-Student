@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class AddNewStudentsByImportDto {
   @IsString()
@@ -8,6 +8,10 @@ export class AddNewStudentsByImportDto {
   @IsString()
   @IsNotEmpty()
   lastName?: string | null;
+
+  @IsString()
+  @IsNotEmpty()
+  fullName?: string | null;
 
   @IsString()
   @IsNotEmpty()

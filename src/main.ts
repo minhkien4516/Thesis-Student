@@ -20,20 +20,20 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT || 3001);
 
-  (async () => {
-    const url = await ngrok.connect({
-      proto: 'http',
-      addr: parseInt(process.env.PORT) || 3001,
-      authtoken: process.env.NGROK_TOKEN,
-      region: 'us',
-    });
-    const api = await ngrok.getApi();
-    const tunnels = await api.listTunnels();
-    console.log(
-      `University local server is publicly-accessible at ${url + '/health'}`,
-    );
-    console.log(Object.values(tunnels)[0][0].public_url);
-  })();
+  // (async () => {
+  //   const url = await ngrok.connect({
+  //     proto: 'http',
+  //     addr: parseInt(process.env.PORT) || 3001,
+  //     authtoken: process.env.NGROK_TOKEN,
+  //     region: 'us',
+  //   });
+  //   const api = await ngrok.getApi();
+  //   const tunnels = await api.listTunnels();
+  //   console.log(
+  //     `University local server is publicly-accessible at ${url + '/health'}`,
+  //   );
+  //   console.log(Object.values(tunnels)[0][0].public_url);
+  // })();
 
   console.log(await app.getUrl());
 }

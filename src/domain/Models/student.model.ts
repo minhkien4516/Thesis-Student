@@ -4,8 +4,8 @@ export class Student extends Model {
   id: number;
   firstName: string;
   lastName: string;
-  birthDate: Date | string;
   email: string;
+  birthDate: string;
   identityNumber: string;
   class: string;
   term: string;

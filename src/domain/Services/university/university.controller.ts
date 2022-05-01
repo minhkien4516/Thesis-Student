@@ -64,8 +64,9 @@ export class UniversityController {
           dto.class = student['Lớp'];
           dto.birthDate = student['Ngày sinh'];
           dto.identityNumber = student['Mã số SV'];
-          dto.lastName = student['Họ và tên đệm'];
-          dto.firstName = student['Tên'];
+          dto.lastName = student['Họ và tên đệm'] || '';
+          dto.firstName = student['Tên'] || '';
+          dto.fullName = dto.lastName.concat(' ', dto.firstName);
           dto.address = student['Địa chỉ'];
           dto.email = (
             student['Mã số SV'].toLowerCase() + '@st.huflit.edu.vn'
@@ -98,6 +99,14 @@ export class UniversityController {
     try {
       const multiStudent = await Promise.all(
         dto.students.map(async (student) => {
+          student.fullName = student.lastName.concat(' ', student.firstName);
+          student.term = student.academicYear =
+            'K' +
+            (
+              parseInt(
+                student.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0],
+              ) + 6
+            ).toString();
           const students = await this.universityService.addNewStudent(student);
           return students[0];
         }),
@@ -130,6 +139,7 @@ export class UniversityController {
       //   (
       //     parseInt(dto.identityNumber.split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
       //   ).toString();
+      dto.fullName = dto.lastName.concat(' ', dto.firstName);
       const result = await this.universityService.UpdateStudentInformation(
         id,
         dto,
@@ -149,6 +159,20 @@ export class UniversityController {
     try {
       const result =
         await this.universityService.getAllIdentityNumberForClient();
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('student/class')
+  public async getAllClass() {
+    try {
+      const result = await this.universityService.getAllClassForClient();
       return result;
     } catch (error) {
       this.logger.error(error.message);

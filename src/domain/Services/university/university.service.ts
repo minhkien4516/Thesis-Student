@@ -21,8 +21,7 @@ export class UniversityService {
       if (!addNewStudentsDto.firstName || !addNewStudentsDto.lastName)
         return [];
       const slug = slugify(
-        addNewStudentsDto.lastName + addNewStudentsDto.firstName,
-        '-',
+        addNewStudentsDto.lastName + '-' + addNewStudentsDto.firstName,
         // {
         //   lower: true,
         //   trim: true,
@@ -30,7 +29,7 @@ export class UniversityService {
         // },
       );
       const inserted: StudentsFilter[] = await this.sequelize.query(
-        'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName, @email=:email,' +
+        'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@slug=:slug',
         {
@@ -38,6 +37,7 @@ export class UniversityService {
           replacements: {
             firstName: addNewStudentsDto.firstName.trim(),
             lastName: addNewStudentsDto.lastName.trim(),
+            fullName: addNewStudentsDto.fullName.trim(),
             email: addNewStudentsDto.email,
             birthDate: addNewStudentsDto.birthDate,
             identityNumber: addNewStudentsDto.identityNumber,
@@ -61,13 +61,12 @@ export class UniversityService {
 
   async UpdateStudentInformation(
     id: string,
-    updateStudentDto: UpdateStudentDto,
+    updateStudentDto?: UpdateStudentDto,
   ) {
     try {
       if (!updateStudentDto.firstName || !updateStudentDto.lastName) return [];
       const slug = slugify(
-        updateStudentDto.lastName + updateStudentDto.firstName,
-        '-',
+        updateStudentDto.lastName + '-' + updateStudentDto.firstName,
         // {
         //   lower: true,
         //   trim: true,
@@ -75,15 +74,16 @@ export class UniversityService {
         // },
       );
       const updated = await this.sequelize.query(
-        'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName, @email=:email,' +
+        'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@slug=:slug',
         {
           type: QueryTypes.SELECT,
           replacements: {
             id,
-            firstName: updateStudentDto.firstName.trim() ?? null,
-            lastName: updateStudentDto.lastName.trim() ?? null,
+            firstName: updateStudentDto?.firstName.trim() ?? null,
+            lastName: updateStudentDto?.lastName.trim() ?? null,
+            fullName: updateStudentDto?.fullName.trim() ?? null,
             email: updateStudentDto.email ?? null,
             birthDate: updateStudentDto.birthDate ?? null,
             identityNumber: updateStudentDto.identityNumber ?? null,
@@ -145,6 +145,18 @@ export class UniversityService {
     }
   }
 
+  public async getAllClassForClient() {
+    try {
+      const result = await this.sequelize.query('SP_GetAllClass', {
+        type: QueryTypes.SELECT,
+      });
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   async getTotalStudentsInUniversityForClient() {
     try {
       const total = await this.sequelize.query('SP_GetTotalStudentsForClient', {
@@ -199,13 +211,12 @@ export class UniversityService {
   ): Promise<StudentsFilter[]> {
     try {
       const total: StudentsFilter[] = await this.sequelize.query(
-        'SP_GetStudentByConditions @identityNumber=:identityNumber,@firstName=:firstName, @lastName=:lastName, @limit=:limit,' +
+        'SP_GetStudentByConditions @identityNumber=:identityNumber,@fullName=:fullName, @limit=:limit,' +
           '@offset=:offset,@status=:status',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            firstName: filterStudentDto.firstName.trim(),
-            lastName: filterStudentDto.lastName.trim(),
+            fullName: filterStudentDto.fullName.trim(),
             limit,
             offset,
             identityNumber: filterStudentDto.identityNumber,
@@ -224,12 +235,11 @@ export class UniversityService {
   async getTotalFilterStudentByConditions(filterStudentDto?: FilterStudentDto) {
     try {
       const total = await this.sequelize.query(
-        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@firstName=:firstName, @lastName=:lastName, @status=:status',
+        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            firstName: filterStudentDto?.firstName.trim(),
-            lastName: filterStudentDto?.lastName.trim(),
+            fullName: filterStudentDto?.fullName.trim(),
             status: filterStudentDto?.status,
             identityNumber: filterStudentDto?.identityNumber,
           },

@@ -7,11 +7,7 @@ export class FilterStudentDto {
 
   @IsOptional()
   @IsString()
-  firstName?: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  fullName?: string;
 
   @IsOptional()
   @IsString()
