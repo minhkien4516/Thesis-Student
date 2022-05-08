@@ -3,6 +3,10 @@ import { IsOptional, IsString } from 'class-validator';
 export class AddNewRésumeDto {
   @IsString()
   @IsOptional()
+  name?: string | null;
+
+  @IsString()
+  @IsOptional()
   studentName?: string | null;
 
   @IsString()

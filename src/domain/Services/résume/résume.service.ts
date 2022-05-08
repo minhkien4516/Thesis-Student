@@ -18,17 +18,18 @@ export class RésumeService {
     addNewRésumeDto: AddNewRésumeDto,
   ): Promise<RésumeFilter[]> {
     try {
-      if (!addNewRésumeDto.studentName) return [];
-      const slug = slugify(addNewRésumeDto.studentName, {
+      if (!addNewRésumeDto.name) return [];
+      const slug = slugify(addNewRésumeDto.name, {
         lower: true,
         trim: true,
         replacement: '-',
       });
       const inserted: RésumeFilter[] = await this.sequelize.query(
-        'SP_AddNewResume @studentName=:studentName, @position=:position, @content=:content, @slug=:slug',
+        'SP_AddNewResume @name=:name,@studentName=:studentName, @position=:position, @content=:content, @slug=:slug',
         {
           type: QueryTypes.SELECT,
           replacements: {
+            name: addNewRésumeDto.name.trim(),
             studentName: addNewRésumeDto.studentName.trim(),
             position: addNewRésumeDto.position,
             content: addNewRésumeDto.content,
@@ -69,11 +70,12 @@ export class RésumeService {
   async UpdateRésume(id: string, updateRésumeDto?: UpdateRésumeDto) {
     try {
       const updated = await this.sequelize.query(
-        'SP_UpdateResume @id=:id,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
+        'SP_UpdateResume @id=:id,@name=:name,@studentName=:studentName,@position=:position,@content=:content,@slug=:slug',
         {
           type: QueryTypes.SELECT,
           replacements: {
             id,
+            name: updateRésumeDto?.name.trim() ?? null,
             studentName: updateRésumeDto?.studentName?.trim() ?? null,
             position: updateRésumeDto?.position ?? null,
             content: updateRésumeDto?.content ?? null,
@@ -85,7 +87,7 @@ export class RésumeService {
         },
       );
 
-      updated[0].slug = slugify(updated[0].studentName);
+      updated[0].slug = slugify(updated[0].name);
       return updated[0];
     } catch (error) {
       this.logger.error(error.message);

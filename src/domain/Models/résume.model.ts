@@ -2,6 +2,7 @@ import { Model } from 'sequelize-typescript';
 
 export class Résume extends Model {
   id: string;
+  name: string;
   studentName: string;
   position: number;
   content: string;
