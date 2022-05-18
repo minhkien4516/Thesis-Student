@@ -19,11 +19,7 @@ export class RésumeService {
   ): Promise<RésumeFilter[]> {
     try {
       if (!addNewRésumeDto.name) return [];
-      const slug = slugify(addNewRésumeDto.name, {
-        lower: true,
-        trim: true,
-        replacement: '-',
-      });
+      const slug = slugify(addNewRésumeDto.name);
       const inserted: RésumeFilter[] = await this.sequelize.query(
         'SP_AddNewResume @name=:name,@studentName=:studentName, @position=:position, @content=:content, @slug=:slug',
         {
