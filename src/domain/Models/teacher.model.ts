@@ -1,19 +1,14 @@
 import { Model } from 'sequelize-typescript';
 
-export class Student extends Model {
+export class Teacher extends Model {
   id: number;
   firstName: string;
   lastName: string;
   fullName: string;
   email: string;
-  birthDate: string;
-  identityNumber: string;
-  class: string;
-  term: string;
-  status: string;
-  academicYear: string;
+  position: string;
+  department: string;
   slug: string;
-  address: string;
   phoneNumber: string;
   isActive: boolean;
   isRegistered: boolean;

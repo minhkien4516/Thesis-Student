@@ -1,3 +1,5 @@
+import { TeachersFilter } from './../../interfaces/getTeacherForClients.interface';
+import { AddNewTeachersByImportDto } from './dtos/addNewTeachers.dtos';
 import { Injectable, Logger } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { DatabaseError, QueryTypes } from 'sequelize';
@@ -7,12 +9,53 @@ import { AddNewStudentsByImportDto } from './dtos/addNewStudents.dtos';
 import { Student } from '../../Models/student.model';
 import { UpdateStudentDto } from './dtos/updateStudent.dtos';
 import { FilterStudentDto } from './dtos/filterStudent.dtos';
+import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
+import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 
 @Injectable()
 export class UniversityService {
   private readonly logger = new Logger('UniversityService');
 
   constructor(private readonly sequelize: Sequelize) {}
+
+  public async addNewTeacher(
+    addNewTeachersByImportDto: AddNewTeachersByImportDto,
+  ): Promise<TeachersFilter[]> {
+    try {
+      if (
+        !addNewTeachersByImportDto.firstName ||
+        !addNewTeachersByImportDto.lastName
+      )
+        return [];
+      const slug = slugify(
+        addNewTeachersByImportDto.lastName +
+          '-' +
+          addNewTeachersByImportDto.firstName,
+      );
+      const inserted: TeachersFilter[] = await this.sequelize.query(
+        'SP_AddNewTeachers @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @position=:position,' +
+          '@department=:department, @phoneNumber=:phoneNumber,@slug=:slug, @email=:email',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            firstName: addNewTeachersByImportDto.firstName.trim(),
+            lastName: addNewTeachersByImportDto.lastName.trim(),
+            fullName: addNewTeachersByImportDto.fullName.trim(),
+            email: addNewTeachersByImportDto.email.trim(),
+            position: addNewTeachersByImportDto.position,
+            department: addNewTeachersByImportDto.department,
+            phoneNumber: addNewTeachersByImportDto.phoneNumber,
+            slug,
+          },
+          raw: true,
+        },
+      );
+      return inserted;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
 
   public async addNewStudent(
     addNewStudentsDto: AddNewStudentsByImportDto,
@@ -22,11 +65,6 @@ export class UniversityService {
         return [];
       const slug = slugify(
         addNewStudentsDto.lastName + '-' + addNewStudentsDto.firstName,
-        // {
-        //   lower: true,
-        //   trim: true,
-        //   replacement: '-',
-        // },
       );
       const inserted: StudentsFilter[] = await this.sequelize.query(
         'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
@@ -101,6 +139,42 @@ export class UniversityService {
     }
   }
 
+  async UpdateTeacherInformation(
+    id: string,
+    updateTeacherDto?: UpdateTeacherDto,
+  ) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_UpdateTeacher @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
+          '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@slug=:slug',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            firstName: updateTeacherDto.firstName?.trim() ?? null,
+            lastName: updateTeacherDto.lastName?.trim() ?? null,
+            fullName: updateTeacherDto.fullName?.trim() ?? null,
+            email: updateTeacherDto.email ?? null,
+            position: updateTeacherDto.position ?? null,
+            department: updateTeacherDto.department ?? null,
+            phoneNumber: updateTeacherDto.phoneNumber ?? null,
+            slug: updateTeacherDto.slug ?? null,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Student,
+        },
+      );
+      updated[0].slug = slugify(
+        updated[0].lastName + '-' + updated[0].firstName,
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getAllStudentForClient(
     limit?: number,
     offset?: number,
@@ -109,6 +183,29 @@ export class UniversityService {
       if (limit < 1 || offset < 0) return [];
       const total: StudentsFilter[] = await this.sequelize.query(
         'SP_GetAllStudentsForClient @limit=:limit,@offset=:offset',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            limit,
+            offset,
+          },
+        },
+      );
+      return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllTeacherForClient(
+    limit?: number,
+    offset?: number,
+  ): Promise<TeachersFilter[]> {
+    try {
+      if (limit < 1 || offset < 0) return [];
+      const total: TeachersFilter[] = await this.sequelize.query(
+        'SP_GetAllTeachersForClient @limit=:limit,@offset=:offset',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -154,6 +251,21 @@ export class UniversityService {
   async getTotalStudentsInUniversityForClient() {
     try {
       const total = await this.sequelize.query('SP_GetTotalStudentsForClient', {
+        type: QueryTypes.SELECT,
+        raw: true,
+        mapToModel: true,
+        model: Student,
+      });
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getTotalTeachersInUniversityForClient() {
+    try {
+      const total = await this.sequelize.query('SP_GetTotalTeachersForClient', {
         type: QueryTypes.SELECT,
         raw: true,
         mapToModel: true,
@@ -226,6 +338,34 @@ export class UniversityService {
     }
   }
 
+  async getFilterTeacherByConditions(
+    limit: number,
+    offset: number,
+    filterTeacherDto: FilterTeacherDto,
+  ): Promise<TeachersFilter[]> {
+    try {
+      const total: TeachersFilter[] = await this.sequelize.query(
+        'SP_GetTeacherByConditions @position=:position,@fullName=:fullName, @limit=:limit,' +
+          '@offset=:offset,@department=:department',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            fullName: filterTeacherDto.fullName.trim() ?? null,
+            limit,
+            offset,
+            position: filterTeacherDto.position ?? null,
+            department: filterTeacherDto.department ?? null,
+          },
+          raw: true,
+        },
+      );
+      return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   async getTotalFilterStudentByConditions(filterStudentDto?: FilterStudentDto) {
     try {
       const total = await this.sequelize.query(
@@ -236,6 +376,27 @@ export class UniversityService {
             fullName: filterStudentDto?.fullName.trim(),
             status: filterStudentDto?.status,
             identityNumber: filterStudentDto?.identityNumber,
+          },
+          raw: true,
+        },
+      );
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getTotalFilterTeacherByConditions(filterTeacherDto?: FilterTeacherDto) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetTotalTeachersByConditions @position=:position,@fullName=:fullName,@department=:department',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            fullName: filterTeacherDto?.fullName.trim(),
+            department: filterTeacherDto?.department,
+            position: filterTeacherDto?.position,
           },
           raw: true,
         },

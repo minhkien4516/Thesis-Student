@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class AddNewStudentsByImportDto {
+export class AddNewTeachersByImportDto {
   @IsString()
   @IsNotEmpty()
   firstName?: string | null;
@@ -19,27 +19,11 @@ export class AddNewStudentsByImportDto {
 
   @IsString()
   @IsNotEmpty()
-  birthDate?: string | null;
+  position?: string | null;
 
   @IsString()
   @IsNotEmpty()
-  identityNumber?: string | null;
-
-  @IsString()
-  @IsNotEmpty()
-  class?: string | null;
-
-  @IsString()
-  @IsNotEmpty()
-  term?: string | null;
-
-  @IsString()
-  @IsNotEmpty()
-  status?: string | null;
-
-  @IsString()
-  @IsNotEmpty()
-  academicYear?: string | null;
+  department?: string | null;
 
   @IsString()
   @IsNotEmpty()
@@ -47,13 +31,9 @@ export class AddNewStudentsByImportDto {
 
   @IsString()
   @IsNotEmpty()
-  address?: string | null;
-
-  @IsString()
-  @IsNotEmpty()
   phoneNumber?: string | null;
 }
 
-export class AddNewStudentsDto {
-  students: [AddNewStudentsByImportDto];
+export class AddNewTeachersDto {
+  teachers: [AddNewTeachersByImportDto];
 }

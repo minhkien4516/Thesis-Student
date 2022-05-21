@@ -29,6 +29,13 @@ import {
 } from './dtos/addNewStudents.dtos';
 import { UpdateStudentDto } from './dtos/updateStudent.dtos';
 import { FilterStudentDto } from './dtos/filterStudent.dtos';
+import {
+  AddNewTeachersByImportDto,
+  AddNewTeachersDto,
+} from './dtos/addNewTeachers.dtos';
+import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
+import { TeachersFilterResponse } from '../../interfaces/getTeacherForClients.interface';
+import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 
 @Controller('university')
 export class UniversityController {
@@ -39,7 +46,7 @@ export class UniversityController {
     private readonly fileService: FilesService,
   ) {}
 
-  @Post('import')
+  @Post('student/import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
   public async AddNewStudentByImport(
     @UploadedFiles() files: { files?: Express.Multer.File },
@@ -66,7 +73,7 @@ export class UniversityController {
           dto.identityNumber = student['Mã số SV'];
           dto.lastName = student['Họ và tên đệm'] || '';
           dto.firstName = student['Tên'] || '';
-          dto.fullName = dto.lastName.concat('', dto.firstName);
+          dto.fullName = dto.lastName.concat('', dto.firstName) || '';
           dto.address = student['Địa chỉ'];
           dto.email = (
             student['Mã số SV'].toLowerCase() + '@st.huflit.edu.vn'
@@ -85,6 +92,52 @@ export class UniversityController {
         }),
       );
       return multiStudent;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Post('teacher/import')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  public async AddNewTeacherByImport(
+    @UploadedFiles() files: { files?: Express.Multer.File },
+  ) {
+    try {
+      const workBook: XLSX.WorkBook = XLSX.read(
+        Object.values(files.files)[0].buffer,
+        {
+          type: 'buffer',
+          cellDates: true,
+          cellNF: false,
+        },
+      );
+      const sheetName = workBook?.SheetNames[0];
+      const sheet: XLSX.WorkSheet = workBook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, {
+        dateNF: 'YYYY-MM-DD',
+      });
+      const multiTeacher = await Promise.all(
+        jsonData.map(async (teacher) => {
+          console.log(teacher['Điện thoại']);
+          const dto = new AddNewTeachersByImportDto();
+          dto.position = teacher['Chức vụ'];
+          dto.department = teacher['Bộ môn'];
+          dto.lastName = teacher['Họ và tên đệm'] || '';
+          dto.firstName = teacher['Tên'] || '';
+          dto.fullName = dto.lastName.concat(' ', dto.firstName) || '';
+          dto.email = teacher['Địa chỉ email'];
+          dto.phoneNumber = teacher['Điện thoại'];
+          const relevant = await this.universityService.addNewTeacher({
+            ...dto,
+          });
+          return relevant[0];
+        }),
+      );
+      return multiTeacher;
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -126,6 +179,27 @@ export class UniversityController {
     }
   }
 
+  @Post('teacher')
+  public async addNewTeachers(@Body() dto: AddNewTeachersDto) {
+    try {
+      const multiTeacher = await Promise.all(
+        dto.teachers.map(async (teacher) => {
+          teacher.fullName =
+            teacher.lastName.concat(' ', teacher.firstName) || ' ';
+          const teachers = await this.universityService.addNewTeacher(teacher);
+          return teachers[0];
+        }),
+      );
+      return multiTeacher;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Patch('student')
   public async updateStudentInformation(
     @Query('id') id: string,
@@ -135,6 +209,28 @@ export class UniversityController {
       dto.fullName =
         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
       const result = await this.universityService.UpdateStudentInformation(
+        id,
+        dto,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Patch('teacher')
+  public async updateTeacherInformation(
+    @Query('id') id: string,
+    @Body() dto: UpdateTeacherDto,
+  ) {
+    try {
+      dto.fullName =
+        dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+      const result = await this.universityService.UpdateTeacherInformation(
         id,
         dto,
       );
@@ -176,6 +272,31 @@ export class UniversityController {
       );
     }
   }
+
+  @Get('teacher/all')
+  public async GetAllTeachersInUniversity(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ): Promise<TeachersFilterResponse> {
+    try {
+      const data = await this.universityService.getAllTeacherForClient(
+        limit,
+        offset,
+      );
+      const total =
+        await this.universityService.getTotalTeachersInUniversityForClient();
+      if (Object.values(total)[0] > 0 && data.length > 0)
+        return { data, pagination: total };
+      return { data: [], pagination: { total: 0 } };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('student/all')
   public async GetAllStudentsInUniversity(
     @Query('limit') limit: number,
@@ -238,6 +359,37 @@ export class UniversityController {
       const total =
         await this.universityService.getTotalFilterStudentByConditions({
           ...filterStudentDto,
+        });
+
+      if (Object.values(total)[0] < 0 && data.length < 0)
+        return { data: [], pagination: { total: 0 } };
+      return { data, pagination: total };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('teacher/filter')
+  public async getTeacherByConditions(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+    @Query() filterTeacherDto: FilterTeacherDto,
+  ): Promise<TeachersFilterResponse> {
+    try {
+      const data = await this.universityService.getFilterTeacherByConditions(
+        limit,
+        offset,
+        {
+          ...filterTeacherDto,
+        },
+      );
+      const total =
+        await this.universityService.getTotalFilterTeacherByConditions({
+          ...filterTeacherDto,
         });
 
       if (Object.values(total)[0] < 0 && data.length < 0)

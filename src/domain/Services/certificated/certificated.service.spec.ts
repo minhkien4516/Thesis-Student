@@ -4,7 +4,7 @@ import databaseConfig from '../../../database/database.config';
 import { DatabaseModule } from '../../../database/database.module';
 import { CertificatedService } from './certificated.service';
 
-describe('SkillService', () => {
+describe('CertificatedService', () => {
   let service: CertificatedService;
 
   beforeEach(async () => {

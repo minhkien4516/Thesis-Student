@@ -44,5 +44,5 @@ async function bootstrap() {
   console.log(await app.getUrl());
 }
 bootstrap().then(() =>
-  console.log(`University server is running on port ${process.env.PORT}`),
+  console.log(`University service is running on port ${process.env.PORT}`),
 );
