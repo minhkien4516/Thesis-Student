@@ -11,7 +11,7 @@ import { RésumeModule } from './domain/Services/résume/résume.module';
 import { SkillModule } from './domain/Services/skill/skill.module';
 import { ContactModule } from './domain/Services/contact/contact.module';
 import { ProjectModule } from './domain/Services/project/project.module';
-
+import { PostModule } from './domain/Services/post/post.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +28,7 @@ import { ProjectModule } from './domain/Services/project/project.module';
     CertificatedModule,
     ProjectModule,
     UniversityModule,
+    PostModule,
   ],
   providers: [
     {

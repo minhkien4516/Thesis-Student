@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class AddNewContactDto {
+export class AddNewPostDto {
   @IsString()
   @IsNotEmpty()
   title?: string | null;
@@ -10,6 +10,6 @@ export class AddNewContactDto {
   content?: string | null;
 }
 
-export class AddNewContactsDto {
-  contact: [AddNewContactDto];
+export class AddNewPostsDto {
+  post: [AddNewPostDto];
 }
