@@ -69,6 +69,7 @@ export class UniversityController {
       const jsonData = XLSX.utils.sheet_to_json(sheet, {
         dateNF: 'YYYY-MM-DD',
       });
+      const birthDate = '';
       const multiStudent = await Promise.all(
         jsonData.map(async (student) => {
           const dto = new AddNewStudentsByImportDto();
@@ -98,7 +99,7 @@ export class UniversityController {
       const result = await this.universityService.getAllStudents();
       result.students.map(async (item) => {
         item.role = 'student';
-        item.password = '1234567890';
+        item.password = item.phoneNumber;
       });
 
       await this.saveStudents(result);
