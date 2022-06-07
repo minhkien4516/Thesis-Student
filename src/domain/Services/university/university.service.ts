@@ -11,6 +11,7 @@ import { UpdateStudentDto } from './dtos/updateStudent.dtos';
 import { FilterStudentDto } from './dtos/filterStudent.dtos';
 import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
 import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
+import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 
 @Injectable()
 export class UniversityService {
@@ -192,6 +193,19 @@ export class UniversityService {
         },
       );
       return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllStudents(): Promise<SaveStudentAccountForOwnerResponse> {
+    try {
+      const students = await this.sequelize.query('SP_GetAllStudents', {
+        type: QueryTypes.SELECT,
+        raw: true,
+      });
+      return { students };
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

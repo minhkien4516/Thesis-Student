@@ -36,6 +36,9 @@ import {
 import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
 import { TeachersFilterResponse } from '../../interfaces/getTeacherForClients.interface';
 import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
+import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
+import { AuthService } from '../auth/auth.service';
+import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
 
 @Controller('university')
 export class UniversityController {
@@ -44,6 +47,7 @@ export class UniversityController {
   constructor(
     private readonly universityService: UniversityService,
     private readonly fileService: FilesService,
+    private readonly authService: AuthService,
   ) {}
 
   @Post('student/import')
@@ -91,6 +95,18 @@ export class UniversityController {
           return relevant[0];
         }),
       );
+      const result = await this.universityService.getAllStudents();
+      result.students.map(async (item) => {
+        item.role = 'student';
+        item.password = '1234567890';
+      });
+
+      await this.saveStudents(result);
+      // result.students.map(async (student) => {
+      //   student.password = '123456';
+      //   student.role = 'student';
+      //   await this.saveStudents(student);
+      // });
       return multiStudent;
     } catch (error) {
       this.logger.error(error.message);
@@ -442,5 +458,16 @@ export class UniversityController {
   catch(error) {
     this.logger.error('Error from storage service: ', error.message);
     return { urls: [] };
+  }
+
+  public async saveStudents(
+    data: SaveStudentAccountForOwnerRequest,
+  ): Promise<SaveStudentAccountForOwnerResponse> {
+    try {
+      return await firstValueFrom(this.authService.registerStudent(data));
+    } catch (error) {
+      this.logger.error('Error from user service: ', error.message);
+      return { students: [] };
+    }
   }
 }
