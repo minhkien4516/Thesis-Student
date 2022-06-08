@@ -13,6 +13,7 @@ message SaveStudent {
     string lastName = 4;
     string phoneNumber = 5;
     string role = 6;
+    string studentId = 7;
 }
 
 message SaveStudentAccountForOwnerRequest {

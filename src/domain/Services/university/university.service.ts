@@ -212,6 +212,27 @@ export class UniversityService {
     }
   }
 
+  public async getStudentById(
+    id: string,
+  ): Promise<SaveStudentAccountForOwnerResponse> {
+    try {
+      const students = await this.sequelize.query(
+        'SP_GetStudentById @id=:id ',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+          },
+          raw: true,
+        },
+      );
+      return { students };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getAllTeacherForClient(
     limit?: number,
     offset?: number,

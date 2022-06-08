@@ -69,7 +69,6 @@ export class UniversityController {
       const jsonData = XLSX.utils.sheet_to_json(sheet, {
         dateNF: 'YYYY-MM-DD',
       });
-      const birthDate = '';
       const multiStudent = await Promise.all(
         jsonData.map(async (student) => {
           const dto = new AddNewStudentsByImportDto();
@@ -97,9 +96,10 @@ export class UniversityController {
         }),
       );
       const result = await this.universityService.getAllStudents();
-      result.students.map(async (item) => {
+      result.students.map((item) => {
         item.role = 'student';
         item.password = item.phoneNumber;
+        item.studentId = item.studentId;
       });
 
       await this.saveStudents(result);
@@ -183,6 +183,17 @@ export class UniversityController {
               student.identityNumber.toLowerCase() + '@st.huflit.edu.vn'
             ).toString() || '';
           const students = await this.universityService.addNewStudent(student);
+          students.map(async (item) => {
+            const student = await this.universityService.getStudentById(
+              item.id,
+            );
+            student.students.map((item) => {
+              item.role = 'student';
+              item.password = item.phoneNumber;
+              item.studentId = item.studentId;
+            });
+            await this.saveStudents(student);
+          });
           return students[0];
         }),
       );
@@ -467,7 +478,10 @@ export class UniversityController {
     try {
       return await firstValueFrom(this.authService.registerStudent(data));
     } catch (error) {
-      this.logger.error('Error from user service: ', error.message);
+      this.logger.error(
+        'Error generate account for student from user service: ',
+        error.message,
+      );
       return { students: [] };
     }
   }
