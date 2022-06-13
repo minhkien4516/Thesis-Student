@@ -106,8 +106,6 @@ export class RésumeController {
             const relevant =
               await this.résumeService.getAllDataForResumeByResumeId(item.id);
             item.details = relevant;
-            console.log(item.details);
-
             return item.details;
           }),
         );

@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package university;
+
+service UniversityService {
+    rpc GetResumeForClient (ResumeFilterRequest) returns (ResumeFilterResponse);
+}
+
+message ResumeFilterRequest {
+    string id = 1;
+    string cvId = 2;
+}
+message File {
+    string id = 1;
+    string ownerId = 2;
+    string url = 3;
+}
+message Student {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string fullName = 4;
+    string email = 5;
+    string birthDate = 6;
+    string identityNumber = 7;
+    string address = 8;
+    string phoneNumber = 9;
+    string class = 10;
+    string term = 11;
+    string status = 12;
+    string academicYear = 13;
+    string slug = 14;
+}
+
+message Contact {
+    string id = 1;
+    string title = 2;
+    string content = 3;
+}
+
+message Certificated {
+    string id = 1;
+    string name = 2;
+    string issueDate = 3;
+    string organizer = 4;
+}
+
+message Skill {
+    string id = 1;
+    string name = 2;
+    string rating = 3;
+    string slug = 4;
+}
+
+message Project {
+    string id = 1;
+    string projectName = 2;
+    string startDate = 3;
+    string endDate = 4;
+    string teamSize = 5;
+    string role = 6;
+    string responsibilities = 7;
+    string sourceLink = 8;
+    string description = 9;
+    repeated Technology technology = 10;
+}
+
+message Technology{
+    string id = 1;
+    string title = 2;
+    string content = 3;
+}
+message ResumeDetail{
+    repeated Student student = 1;
+    repeated Contact contacts = 2;
+    repeated Certificated  certificated = 3;
+    repeated Skill skills = 4;
+    repeated Project project = 5;
+}
+
+message ResumeFilter{
+    string id = 1;
+    string studentName = 2;
+    string position = 3; 
+    string content = 4;
+    string slug = 5;
+    repeated File images = 6;
+    ResumeDetail details = 7;
+}
+  
+
+message ResumeFilterResponse {
+   repeated ResumeFilter data = 1;
+}

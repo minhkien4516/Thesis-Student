@@ -3,8 +3,9 @@ import { Module } from '@nestjs/common';
 import { UniversityController } from './university.controller';
 import { FilesModule } from '../files/files.module';
 import { AuthModule } from '../auth/auth.module';
+import { RésumeModule } from '../résume/résume.module';
 @Module({
-  imports: [FilesModule, AuthModule],
+  imports: [FilesModule, AuthModule, RésumeModule],
   controllers: [UniversityController],
   providers: [UniversityService],
   exports: [UniversityService],

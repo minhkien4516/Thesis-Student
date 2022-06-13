@@ -3,11 +3,27 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import ngrok from 'ngrok';
+import { Transport } from '@nestjs/microservices';
+import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: true }));
+
+  app.connectMicroservice({
+    transport: Transport.GRPC,
+    options: {
+      package: 'university',
+      protoPath: join(
+        __dirname,
+        './domain/Services/university/university.proto',
+      ),
+      url: configService.get<string>('GRPC_CONNECTION_URL'),
+    },
+  });
   await app.startAllMicroservices();
 
   const config = new DocumentBuilder()

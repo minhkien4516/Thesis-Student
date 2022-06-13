@@ -1,3 +1,4 @@
+import { ResumeFilter } from './../../interfaces/getRésumeForClients.interface';
 import { AddStudentResumeDto } from './dtos/addStudentResume.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
@@ -115,6 +116,50 @@ export class RésumeService {
       throw new DatabaseError(error);
     }
   }
+
+  public async getResumeByStudentIdAndCvId(
+    id: string,
+    cvId: string,
+  ): Promise<ResumeFilter[]> {
+    try {
+      const resume: ResumeFilter[] = await this.sequelize.query(
+        'SP_GetFullResumeForStudentByStudentId @id=:id, @cvId=:cvId',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            cvId,
+          },
+        },
+      );
+      return resume;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+  async getTotalResumeByStudentIdAndCvId(id: string, cvId: string) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetTotalCVForStudentByStudentId @id=:id, @cvId=:cvId ',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            cvId,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Résume,
+        },
+      );
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   async getTotalResumeByStudentId(id: string) {
     try {
       const total = await this.sequelize.query(

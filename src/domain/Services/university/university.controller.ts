@@ -5,7 +5,6 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-  Param,
   Patch,
   Post,
   Query,
@@ -18,6 +17,8 @@ import { FilesService } from '../files/files.service';
 import { UniversityService } from './university.service';
 import {
   GetAllForOwnerResponse,
+  ResumeFilterRequest,
+  ResumeFilterResponse,
   StudentsFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
@@ -39,6 +40,8 @@ import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 import { AuthService } from '../auth/auth.service';
 import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
+import { GrpcMethod } from '@nestjs/microservices';
+import { RésumeService } from '../résume/résume.service';
 
 @Controller('university')
 export class UniversityController {
@@ -48,6 +51,7 @@ export class UniversityController {
     private readonly universityService: UniversityService,
     private readonly fileService: FilesService,
     private readonly authService: AuthService,
+    private readonly résumeService: RésumeService,
   ) {}
 
   @Post('student/import')
@@ -95,20 +99,26 @@ export class UniversityController {
           return relevant[0];
         }),
       );
-      const result = await this.universityService.getAllStudents();
-      result.students.map((item) => {
+      return multiStudent;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('student/generate-account')
+  public async generateAcountStudent() {
+    try {
+      const student = await this.universityService.getAllStudents();
+      await student.students.map((item) => {
         item.role = 'student';
         item.password = item.phoneNumber;
         item.studentId = item.studentId;
       });
-
-      await this.saveStudents(result);
-      // result.students.map(async (student) => {
-      //   student.password = '123456';
-      //   student.role = 'student';
-      //   await this.saveStudents(student);
-      // });
-      return multiStudent;
+      return await this.saveStudents(student);
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -448,6 +458,42 @@ export class UniversityController {
     }
   }
 
+  @GrpcMethod('UniversityService')
+  async getResumeForClient(
+    data_temp: ResumeFilterRequest,
+  ): Promise<ResumeFilterResponse> {
+    if (data_temp.id.trim() == '') return { data: [] };
+    try {
+      const data = await this.résumeService.getResumeByStudentIdAndCvId(
+        data_temp.id,
+        data_temp.cvId,
+      );
+      const total = await this.résumeService.getTotalResumeByStudentIdAndCvId(
+        data_temp.id,
+        data_temp.cvId,
+      );
+      if (Object.values(total)[0] > 0 && data.length > 0) {
+        const { files } = await this.getImages(data[0].id);
+        Object.values(data)[0].images = files;
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant =
+              await this.résumeService.getAllDataForResumeByResumeId(item.id);
+            item.details = relevant;
+
+            return item.details;
+          }),
+        );
+        return { data };
+      }
+
+      return { data: [] };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
+
   public async uploadImages(
     corporationId: string,
     filesParam: Express.Multer.File[],
@@ -479,8 +525,8 @@ export class UniversityController {
       return await firstValueFrom(this.authService.registerStudent(data));
     } catch (error) {
       this.logger.error(
-        'Error generate account for student from user service: ',
-        error.message,
+        'Error when generate account for student from user service: ' +
+          error.message,
       );
       return { students: [] };
     }
