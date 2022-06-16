@@ -1,3 +1,4 @@
+import { RegisterTeacherForStudentsDto } from './dtos/registerTeacherForStudent.dtos';
 import {
   Body,
   Controller,
@@ -35,7 +36,10 @@ import {
   AddNewTeachersDto,
 } from './dtos/addNewTeachers.dtos';
 import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
-import { TeachersFilterResponse } from '../../interfaces/getTeacherForClients.interface';
+import {
+  TeacherDetail,
+  TeachersFilterResponse,
+} from '../../interfaces/getTeacherForClients.interface';
 import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 import { AuthService } from '../auth/auth.service';
@@ -54,6 +58,53 @@ export class UniversityController {
     private readonly résumeService: RésumeService,
   ) {}
 
+  @Post('/student/register-teacher')
+  async registerStudentForTeacher(@Body() dto: RegisterTeacherForStudentsDto) {
+    try {
+      const multiRegistration = await Promise.all(
+        dto.teacher.map(async (item) => {
+          const teacherAmount =
+            await this.universityService.getAllTeacherForClientNotPagination();
+          const totalTeacher = teacherAmount.length;
+          console.log(teacherAmount.length);
+
+          const studentAmount =
+            await this.universityService.getAllStudentsForClientNotPagination();
+          const totalStudent = studentAmount.length;
+
+          const average = (totalStudent + totalTeacher) / 4;
+          console.log(Math.floor(average));
+          const register =
+            await this.universityService.registerTeacherForStudent(item);
+          if (!register) {
+            throw new HttpException(
+              'You have not been allowed to register more than one teacher',
+              HttpStatus.BAD_REQUEST,
+            );
+          } else {
+            const teacher = await this.universityService.getTeacherById(
+              item.teacherId,
+            );
+            await this.universityService.UpdateStudentInformation(
+              item.studentId,
+              {
+                nameTeacher:
+                  Object.values(teacher)[0][0].fullName.toString() || '',
+              },
+            );
+          }
+          return { register, message: 'Successfully registered' };
+        }),
+      );
+      return multiRegistration;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
   @Post('student/import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
   public async AddNewStudentByImport(
@@ -93,6 +144,7 @@ export class UniversityController {
             ).toString();
           dto.phoneNumber = student['Số điện thoại'];
           dto.status = student['Trạng thái'];
+          dto.nameTeacher = student['GVHD'];
           const relevant = await this.universityService.addNewStudent({
             ...dto,
           });
@@ -149,7 +201,7 @@ export class UniversityController {
       });
       const multiTeacher = await Promise.all(
         jsonData.map(async (teacher) => {
-          console.log(teacher['Điện thoại']);
+          console.log(teacher['Số lượng SV']);
           const dto = new AddNewTeachersByImportDto();
           dto.position = teacher['Chức vụ'];
           dto.department = teacher['Bộ môn'];
@@ -158,6 +210,8 @@ export class UniversityController {
           dto.fullName = dto.lastName.concat(' ', dto.firstName) || '';
           dto.email = teacher['Địa chỉ email'];
           dto.phoneNumber = teacher['Điện thoại'];
+          dto.studentAmount = teacher['Số lượng SV'];
+          console.log(dto);
           const relevant = await this.universityService.addNewTeacher({
             ...dto,
           });
@@ -311,7 +365,7 @@ export class UniversityController {
     }
   }
 
-  @Get('teacher/all')
+  @Get('teacher/all/pagination')
   public async GetAllTeachersInUniversity(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
@@ -326,6 +380,36 @@ export class UniversityController {
       if (Object.values(total)[0] > 0 && data.length > 0)
         return { data, pagination: total };
       return { data: [], pagination: { total: 0 } };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+  @Get('teacher')
+  async GetTeacherById(@Query('id') id: string): Promise<TeacherDetail> {
+    try {
+      const teacher = await this.universityService.getTeacherById(id);
+      if (Object.values(teacher)[0][0] === undefined) return {};
+      return teacher;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('teacher/all')
+  public async GetAllTeachersInUniversityNotPagination() {
+    try {
+      const data =
+        await this.universityService.getAllTeacherForClientNotPagination();
+      if (data.length > 0) return { data };
+      return { data: [] };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

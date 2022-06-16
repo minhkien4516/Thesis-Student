@@ -12,6 +12,7 @@ export interface StudentsFilter {
   slug?: string;
   address?: string;
   phoneNumber?: string;
+  nameTeacher?: string;
   isActive: boolean;
   isRegistered: boolean;
   createdAt: string;

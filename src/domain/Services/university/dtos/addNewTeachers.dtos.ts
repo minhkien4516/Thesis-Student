@@ -31,6 +31,10 @@ export class AddNewTeachersByImportDto {
 
   @IsString()
   @IsNotEmpty()
+  studentAmount?: number | null;
+
+  @IsString()
+  @IsNotEmpty()
   phoneNumber?: string | null;
 }
 
