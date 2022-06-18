@@ -35,6 +35,10 @@ export class AddNewTeachersByImportDto {
 
   @IsString()
   @IsNotEmpty()
+  maximumStudentAmount?: number | null;
+
+  @IsString()
+  @IsNotEmpty()
   phoneNumber?: string | null;
 }
 

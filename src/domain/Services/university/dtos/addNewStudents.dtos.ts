@@ -56,6 +56,14 @@ export class AddNewStudentsByImportDto {
   @IsString()
   @IsNotEmpty()
   nameTeacher?: string | null;
+
+  @IsString()
+  @IsNotEmpty()
+  internshipCertification?: string | null;
+
+  @IsString()
+  @IsNotEmpty()
+  internshipReport?: string | null;
 }
 
 export class AddNewStudentsDto {

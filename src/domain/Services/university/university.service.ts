@@ -1,3 +1,4 @@
+import { StudentFilter } from './../../interfaces/getStudentForClients.interface';
 import { TeachersFilter } from './../../interfaces/getTeacherForClients.interface';
 import { AddNewTeachersByImportDto } from './dtos/addNewTeachers.dtos';
 import { Injectable, Logger } from '@nestjs/common';
@@ -36,7 +37,8 @@ export class UniversityService {
       );
       const inserted: TeachersFilter[] = await this.sequelize.query(
         'SP_AddNewTeachers @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @position=:position,' +
-          '@department=:department, @phoneNumber=:phoneNumber,@slug=:slug,@studentAmount=:studentAmount, @email=:email',
+          '@department=:department, @phoneNumber=:phoneNumber,@slug=:slug,@studentAmount=:studentAmount,' +
+          '@maximumStudentAmount=:maximumStudentAmount,@email=:email',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -48,6 +50,8 @@ export class UniversityService {
             department: addNewTeachersByImportDto.department,
             phoneNumber: addNewTeachersByImportDto.phoneNumber,
             studentAmount: addNewTeachersByImportDto.studentAmount,
+            maximumStudentAmount:
+              addNewTeachersByImportDto.maximumStudentAmount,
             slug,
           },
           raw: true,
@@ -88,7 +92,8 @@ export class UniversityService {
       const inserted: StudentsFilter[] = await this.sequelize.query(
         'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
-          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug',
+          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
+          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -105,6 +110,8 @@ export class UniversityService {
             status: addNewStudentsDto.status,
             academicYear: addNewStudentsDto.academicYear,
             nameTeacher: addNewStudentsDto.nameTeacher,
+            internshipCertification: addNewStudentsDto.internshipCertification,
+            internshipReport: addNewStudentsDto.internshipReport,
             slug,
           },
           raw: true,
@@ -125,7 +132,8 @@ export class UniversityService {
       const updated = await this.sequelize.query(
         'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
-          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug',
+          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
+          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -144,6 +152,9 @@ export class UniversityService {
             academicYear: updateStudentDto.academicYear ?? null,
             nameTeacher: updateStudentDto.nameTeacher ?? null,
             slug: updateStudentDto.slug ?? null,
+            internshipCertification:
+              updateStudentDto.internshipCertification ?? null,
+            internshipReport: updateStudentDto.internshipReport ?? null,
           },
           raw: true,
           mapToModel: true,
@@ -167,7 +178,8 @@ export class UniversityService {
     try {
       const updated = await this.sequelize.query(
         'SP_UpdateTeacher @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
-          '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@studentAmount=:studentAmount,@slug=:slug',
+          '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@studentAmount=:studentAmount,@slug=:slug,' +
+          '@maximumStudentAmount=:maximumStudentAmount',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -181,6 +193,7 @@ export class UniversityService {
             phoneNumber: updateTeacherDto.phoneNumber ?? null,
             studentAmount: updateTeacherDto.studentAmount ?? null,
             slug: updateTeacherDto.slug ?? null,
+            maximumStudentAmount: updateTeacherDto.maximumStudentAmount ?? null,
           },
           raw: true,
           mapToModel: true,
@@ -488,6 +501,36 @@ export class UniversityService {
         },
       );
       return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getStudentByIdForClient(id: string): Promise<StudentFilter> {
+    try {
+      const student = await this.sequelize.query('SP_GetStudentById @id=:id', {
+        type: QueryTypes.RAW,
+        replacements: {
+          id,
+        },
+        raw: true,
+      });
+
+      if (
+        typeof Object.keys(student) == null ||
+        typeof Object.keys(student) == 'undefined' ||
+        !student[0].length
+      )
+        return student[0][0];
+      {
+        const info: string = student[0]
+          .map((each: string) => {
+            return Object.values(each)[0];
+          })
+          .reduce((acc: string, curr: string) => acc + curr, '');
+        return JSON.parse(info);
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

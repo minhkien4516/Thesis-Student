@@ -7,7 +7,8 @@ export interface TeachersFilter {
   department?: string;
   slug?: string;
   phoneNumber?: string;
-  studentAmount?: string;
+  studentAmount?: number;
+  maximumStudentAmount?: number;
   isActive: boolean;
   isRegistered: boolean;
   createdAt: string;
@@ -30,6 +31,8 @@ export interface TeacherDetail {
       department?: string;
       slug?: string;
       phoneNumber?: string;
+      studentAmount?: number;
+      maximumStudentAmount?: number;
       isActive: boolean;
       isRegistered: boolean;
       createdAt: string;
@@ -51,6 +54,9 @@ export interface TeacherDetail {
       slug?: string;
       address?: string;
       phoneNumber?: string;
+      nameTeacher?: string;
+      internshipCertification?: string;
+      internshipReport?: string;
       isActive: boolean;
       isRegistered: boolean;
       createdAt: string;

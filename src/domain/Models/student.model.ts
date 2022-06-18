@@ -15,6 +15,9 @@ export class Student extends Model {
   slug: string;
   address: string;
   phoneNumber: string;
+  nameTeacher: string;
+  internshipCertification: string;
+  internshipReport: string;
   isActive: boolean;
   isRegistered: boolean;
   createdAt: Date | string;

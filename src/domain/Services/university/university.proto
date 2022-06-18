@@ -4,6 +4,7 @@ package university;
 
 service UniversityService {
     rpc GetResumeForClient (ResumeFilterRequest) returns (ResumeFilterResponse);
+    rpc GetStudentByIdGrpc (getStudentbyIdForLoginRequest) returns (StudentFilter);
 }
 
 message ResumeFilterRequest {
@@ -91,4 +92,44 @@ message ResumeFilter{
 
 message ResumeFilterResponse {
    repeated ResumeFilter data = 1;
+}
+
+
+message getStudentbyIdForLoginRequest{
+    string id = 1;
+}
+
+message StudentFilter {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string fullName = 4;
+    string email = 5;
+    string birthDate = 6;
+    string identityNumber = 7;
+    string address = 8;
+    string phoneNumber = 9;
+    string class = 10;
+    string term = 11;
+    string status = 12;
+    string academicYear = 13;
+    string nameTeacher = 14;
+    string slug = 15;
+    string internshipCertification = 16;
+    string internshipReport = 17;
+    repeated CV cv = 18;
+}
+
+message CV {
+    string id = 1;
+    string studentName = 2;
+    string position = 3;
+    string content = 4;
+    string slug =5 ;
+    string isActive = 6;
+    repeated File images = 7;
+    repeated Contact contact = 8;
+    repeated Skill skill = 9;
+    repeated Certificated certificated = 10;
+    repeated Project project = 11;
 }

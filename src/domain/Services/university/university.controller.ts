@@ -1,3 +1,4 @@
+import { StudentFilter } from './../../interfaces/getStudentForClients.interface';
 import { RegisterTeacherForStudentsDto } from './dtos/registerTeacherForStudent.dtos';
 import {
   Body,
@@ -20,6 +21,7 @@ import {
   GetAllForOwnerResponse,
   ResumeFilterRequest,
   ResumeFilterResponse,
+  StudentFilterResponse,
   StudentsFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
@@ -46,6 +48,11 @@ import { AuthService } from '../auth/auth.service';
 import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
 import { GrpcMethod } from '@nestjs/microservices';
 import { RésumeService } from '../résume/résume.service';
+import {
+  MAIL_STUDENT,
+  STUDENT_ROLE,
+} from '../../../constants/authService.constant';
+import { getStudentByIdForLoginRequest } from '../../interfaces/getStudentByIdForLoginRequest';
 
 @Controller('university')
 export class UniversityController {
@@ -63,17 +70,6 @@ export class UniversityController {
     try {
       const multiRegistration = await Promise.all(
         dto.teacher.map(async (item) => {
-          const teacherAmount =
-            await this.universityService.getAllTeacherForClientNotPagination();
-          const totalTeacher = teacherAmount.length;
-          console.log(teacherAmount.length);
-
-          const studentAmount =
-            await this.universityService.getAllStudentsForClientNotPagination();
-          const totalStudent = studentAmount.length;
-
-          const average = (totalStudent + totalTeacher) / 4;
-          console.log(Math.floor(average));
           const register =
             await this.universityService.registerTeacherForStudent(item);
           if (!register) {
@@ -135,7 +131,7 @@ export class UniversityController {
           dto.fullName = dto.lastName.concat('', dto.firstName) || '';
           dto.address = student['Địa chỉ'];
           dto.email = (
-            student['Mã số SV'].toLowerCase() + '@st.huflit.edu.vn'
+            student['Mã số SV'].toLowerCase() + MAIL_STUDENT
           ).toString();
           dto.term = dto.academicYear =
             'K' +
@@ -145,6 +141,9 @@ export class UniversityController {
           dto.phoneNumber = student['Số điện thoại'];
           dto.status = student['Trạng thái'];
           dto.nameTeacher = student['GVHD'];
+          dto.internshipCertification =
+            student['Phiếu tiếp nhận sinh viên thực tập'];
+          dto.internshipReport = student['Phiếu báo cáo thực tập'];
           const relevant = await this.universityService.addNewStudent({
             ...dto,
           });
@@ -171,6 +170,58 @@ export class UniversityController {
         item.studentId = item.studentId;
       });
       return await this.saveStudents(student);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+  @GrpcMethod('UniversityService')
+  async getStudentByIdGrpc(
+    data: getStudentByIdForLoginRequest,
+  ): Promise<StudentFilter> {
+    if (data.id.trim() == '') return {};
+    try {
+      const student = await this.universityService.getStudentByIdForClient(
+        data.id,
+      );
+      console.log(Object.values(student));
+      if (Object.values(student) == undefined) {
+        return {};
+      } else {
+        await Promise.all(
+          student.cv.map(async (item) => {
+            const { files } = await this.getImages(item.id);
+            item.images = files;
+            return item.images;
+          }),
+        );
+        return student;
+      }
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
+  @Get('student')
+  public async getStudentById(@Query('id') id: string) {
+    try {
+      const student = await this.universityService.getStudentByIdForClient(id);
+      console.log(student);
+      if (Object.values(student)[0] == undefined) {
+        return {};
+      } else {
+        await Promise.all(
+          student.cv.map(async (item) => {
+            const { files } = await this.getImages(item.id);
+            item.images = files;
+            return item.images;
+          }),
+        );
+        return student;
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -210,8 +261,8 @@ export class UniversityController {
           dto.fullName = dto.lastName.concat(' ', dto.firstName) || '';
           dto.email = teacher['Địa chỉ email'];
           dto.phoneNumber = teacher['Điện thoại'];
-          dto.studentAmount = teacher['Số lượng SV'];
-          console.log(dto);
+          dto.studentAmount = teacher['Số lượng SV hiện tại'];
+          dto.maximumStudentAmount = teacher['Số lượng SV tối đa'];
           const relevant = await this.universityService.addNewTeacher({
             ...dto,
           });
@@ -243,16 +294,15 @@ export class UniversityController {
                 ) + 6
               ).toString() || '';
           student.email =
-            (
-              student.identityNumber.toLowerCase() + '@st.huflit.edu.vn'
-            ).toString() || '';
+            (student.identityNumber.toLowerCase() + MAIL_STUDENT).toString() ||
+            '';
           const students = await this.universityService.addNewStudent(student);
           students.map(async (item) => {
             const student = await this.universityService.getStudentById(
               item.id,
             );
             student.students.map((item) => {
-              item.role = 'student';
+              item.role = STUDENT_ROLE;
               item.password = item.phoneNumber;
               item.studentId = item.studentId;
             });

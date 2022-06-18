@@ -5,7 +5,7 @@ import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes, DatabaseError } from 'sequelize';
 import slugify from 'vietnamese-slug';
 import { AddNewRésumeDto } from './dtos/addNewRésume.dto';
-import { RésumeFilter } from '../../interfaces';
+import { RésumeFilter, StudentDetail } from '../../interfaces';
 import { UpdateRésumeDto } from './dtos/updateRésume.dto';
 import { Résume } from '../../Models/résume.model';
 
@@ -117,6 +117,23 @@ export class RésumeService {
     }
   }
 
+  public async getFullResume(id: string): Promise<StudentDetail[]> {
+    try {
+      const resume: StudentDetail[] = await this.sequelize.query(
+        'SP_GetFullResumeForStudent @id=:id',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+          },
+        },
+      );
+      return resume;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
   public async getResumeByStudentIdAndCvId(
     id: string,
     cvId: string,

@@ -10,6 +10,8 @@ export class Teacher extends Model {
   department: string;
   slug: string;
   phoneNumber: string;
+  studentAmount: number;
+  maximumStudentAmount: number;
   isActive: boolean;
   isRegistered: boolean;
   createdAt: Date | string;
