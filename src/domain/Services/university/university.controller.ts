@@ -70,28 +70,70 @@ export class UniversityController {
     try {
       const multiRegistration = await Promise.all(
         dto.teacher.map(async (item) => {
-          const register =
-            await this.universityService.registerTeacherForStudent(item);
-          if (!register) {
+          const temp = await this.universityService.getTeacherById(
+            item.teacherId,
+          );
+          if (Object.values(temp)[0][0] === undefined)
             throw new HttpException(
-              'You have not been allowed to register more than one teacher',
+              'This teacher does not exist in system....',
               HttpStatus.BAD_REQUEST,
             );
-          } else {
-            const teacher = await this.universityService.getTeacherById(
-              item.teacherId,
-            );
-            await this.universityService.UpdateStudentInformation(
-              item.studentId,
-              {
-                nameTeacher:
-                  Object.values(teacher)[0][0].fullName.toString() || '',
-              },
-            );
+          if (Object.values(temp)[0][0].maximumStudentAmount === 0) {
+            const register =
+              await this.universityService.registerTeacherForStudent(item);
+            if (!register) {
+              throw new HttpException(
+                'You have not been allowed to register more than one teacher',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else {
+              const teacher = await this.universityService.getTeacherById(
+                item.teacherId,
+              );
+              await this.universityService.UpdateStudentInformation(
+                item.studentId,
+                {
+                  nameTeacher:
+                    Object.values(teacher)[0][0].fullName.toString() || '',
+                },
+              );
+            }
+            return { register, message: 'Successfully registered' };
+          } else if (Object.values(temp)[0][0].maximumStudentAmount > 0) {
+            if (
+              Object.values(temp)[0][0].studentAmount <
+              Object.values(temp)[0][0].maximumStudentAmount
+            ) {
+              const register =
+                await this.universityService.registerTeacherForStudent(item);
+              if (!register) {
+                throw new HttpException(
+                  'You have not been allowed to register more than one teacher',
+                  HttpStatus.BAD_REQUEST,
+                );
+              } else {
+                const teacher = await this.universityService.getTeacherById(
+                  item.teacherId,
+                );
+                await this.universityService.UpdateStudentInformation(
+                  item.studentId,
+                  {
+                    nameTeacher:
+                      Object.values(teacher)[0][0].fullName.toString() || '',
+                  },
+                );
+              }
+              return { register, message: 'Successfully registered' };
+            } else {
+              throw new HttpException(
+                'This teacher has reached the maximum number of students',
+                HttpStatus.BAD_REQUEST,
+              );
+            }
           }
-          return { register, message: 'Successfully registered' };
         }),
       );
+
       return multiRegistration;
     } catch (error) {
       this.logger.error(error.message);
@@ -109,10 +151,10 @@ export class UniversityController {
     try {
       const multiUnRegistration = await Promise.all(
         dto.teacher.map(async (item) => {
-          const unRegister =
+          const teacher =
             await this.universityService.unRegisterTeacherForStudent(item);
-          console.log(unRegister);
-          if (!unRegister) {
+          console.log(teacher);
+          if (!teacher) {
             throw new HttpException(
               'This student and teacher do not exist in system....',
               HttpStatus.BAD_REQUEST,
@@ -124,8 +166,13 @@ export class UniversityController {
                 nameTeacher: '',
               },
             );
+            const student =
+              await this.universityService.getStudentByIdForClient(
+                item.studentId,
+              );
+
+            return { teacher, student, message: 'Successfully unregistered' };
           }
-          return { unRegister, message: 'Successfully unregistered' };
         }),
       );
       return multiUnRegistration;

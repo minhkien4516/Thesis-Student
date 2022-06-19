@@ -50,10 +50,16 @@ export class RésumeController {
         cvId: Object.values(result)[0].id,
         studentId,
       });
-      await this.uploadImages(Object.values(result)[0].id, files.files);
+      // await this.uploadImages(Object.values(result)[0].id, files.files);
+      await this.uploadImages(
+        '81887B53-3EE8-4A7C-B880-A091061B75EE',
+        files.files,
+      );
       await Promise.all(
         result.map(async (item) => {
-          const { files } = await this.getImages(item.id);
+          const { files } = await this.getImages(
+            '81887B53-3EE8-4A7C-B880-A091061B75EE',
+          );
           item.images = files;
           return item.images;
         }),
