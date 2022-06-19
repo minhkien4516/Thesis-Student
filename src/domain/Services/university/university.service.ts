@@ -80,6 +80,23 @@ export class UniversityService {
     }
   }
 
+  public async unRegisterTeacherForStudent(dto: RegisterTeacherForStudentDto) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_UnRegisterTeacherForStudent @teacherId=:teacherId, @studentId=:studentId',
+        {
+          type: QueryTypes.SELECT,
+          replacements: { teacherId: dto.teacherId, studentId: dto.studentId },
+          raw: true,
+        },
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async addNewStudent(
     addNewStudentsDto: AddNewStudentsByImportDto,
   ): Promise<StudentsFilter[]> {

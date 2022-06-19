@@ -101,6 +101,42 @@ export class UniversityController {
       );
     }
   }
+
+  @Patch('/student/unregister-teacher')
+  async unRegisterStudentForTeacher(
+    @Body() dto: RegisterTeacherForStudentsDto,
+  ) {
+    try {
+      const multiUnRegistration = await Promise.all(
+        dto.teacher.map(async (item) => {
+          const unRegister =
+            await this.universityService.unRegisterTeacherForStudent(item);
+          console.log(unRegister);
+          if (!unRegister) {
+            throw new HttpException(
+              'This student and teacher do not exist in system....',
+              HttpStatus.BAD_REQUEST,
+            );
+          } else {
+            await this.universityService.UpdateStudentInformation(
+              item.studentId,
+              {
+                nameTeacher: '',
+              },
+            );
+          }
+          return { unRegister, message: 'Successfully unregistered' };
+        }),
+      );
+      return multiUnRegistration;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
   @Post('student/import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
   public async AddNewStudentByImport(

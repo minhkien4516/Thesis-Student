@@ -42,6 +42,7 @@ export class RésumeController {
     @UploadedFiles() files: { files?: Express.Multer.File[] },
   ): Promise<RésumeFilter[]> {
     try {
+      console.log(files);
       const result = await this.résumeService.addNewRésume({
         ...addNewRésume,
       });
