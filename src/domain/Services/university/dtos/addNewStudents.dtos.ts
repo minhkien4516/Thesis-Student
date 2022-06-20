@@ -1,68 +1,68 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class AddNewStudentsByImportDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   firstName?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   lastName?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   fullName?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   email?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   birthDate?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   identityNumber?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   class?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   term?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   status?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   academicYear?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   slug?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   address?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   phoneNumber?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   nameTeacher?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   internshipCertification?: string | null;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   internshipReport?: string | null;
 }
 

@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { filesPackageProvideToken } from '../../../constants/fileService.constant';
+import { filesPackageProvideToken } from '../../../common/constants/fileService.constant';
 
 export const filesProvider = [
   {

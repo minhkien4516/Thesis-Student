@@ -5,7 +5,7 @@ import {
   HealthCheckService,
   SequelizeHealthIndicator,
 } from '@nestjs/terminus';
-import { defaultTimeout } from '../constants/timeout.constant';
+import { defaultTimeout } from '../common/constants/timeout.constant';
 
 @Controller('health')
 export class HealthController {

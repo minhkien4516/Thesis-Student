@@ -21,9 +21,9 @@ import {
   RésumeFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
-import { defaultTimeout } from '../../../constants/timeout.constant';
 import { AddNewRésumeDto } from './dtos/addNewRésume.dto';
 import { UpdateRésumeDto } from './dtos/updateRésume.dto';
+import { defaultTimeout } from '../../../common/constants/timeout.constant';
 
 @Controller('resume')
 export class RésumeController {
@@ -50,16 +50,10 @@ export class RésumeController {
         cvId: Object.values(result)[0].id,
         studentId,
       });
-      // await this.uploadImages(Object.values(result)[0].id, files.files);
-      await this.uploadImages(
-        '81887B53-3EE8-4A7C-B880-A091061B75EE',
-        files.files,
-      );
+      await this.uploadImages(Object.values(result)[0].id, files.files);
       await Promise.all(
         result.map(async (item) => {
-          const { files } = await this.getImages(
-            '81887B53-3EE8-4A7C-B880-A091061B75EE',
-          );
+          const { files } = await this.getImages(item.id);
           item.images = files;
           return item.images;
         }),

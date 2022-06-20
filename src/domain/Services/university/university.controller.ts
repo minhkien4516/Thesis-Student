@@ -14,18 +14,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { firstValueFrom, timeout } from 'rxjs';
+import { timeout, firstValueFrom } from 'rxjs';
 import { FilesService } from '../files/files.service';
 import { UniversityService } from './university.service';
 import {
   GetAllForOwnerResponse,
   ResumeFilterRequest,
   ResumeFilterResponse,
-  StudentFilterResponse,
   StudentsFilterResponse,
   UploadFilesForOwnerResponse,
 } from '../../interfaces';
-import { defaultTimeout } from '../../../constants/timeout.constant';
+import { defaultTimeout } from '../../../common/constants/timeout.constant';
 import * as XLSX from 'xlsx';
 import {
   AddNewStudentsByImportDto,
@@ -51,8 +50,9 @@ import { RésumeService } from '../résume/résume.service';
 import {
   MAIL_STUDENT,
   STUDENT_ROLE,
-} from '../../../constants/authService.constant';
+} from '../../../common/constants/authService.constant';
 import { getStudentByIdForLoginRequest } from '../../interfaces/getStudentByIdForLoginRequest';
+import { Status } from '../../../common/enums/status.enum';
 
 @Controller('university')
 export class UniversityController {
@@ -314,6 +314,93 @@ export class UniversityController {
     }
   }
 
+  @Patch('student/import-internshipCertification')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  public async importInternshipCertification(
+    @Query('id') id: string,
+    @UploadedFiles() Files: { files?: Express.Multer.File[] },
+  ) {
+    try {
+      const student = await this.universityService.getStudentByIdForClient(id);
+      if (Object.entries(student)[0] == undefined || !Files) {
+        throw new HttpException(
+          'This student does not exist in our system or you do not attach essential file...',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        await this.uploadImages(Object.entries(student)[0][1], Files.files);
+        const { files } = await this.getImages(Object.entries(student)[0][1]);
+        if (Object.values(files)[0].url != null) {
+          if (Object.entries(student)[16][1] == null) {
+            const studentUpdate =
+              await this.universityService.UpdateStudentInformation(id, {
+                internshipCertification: Object.values(files)[0].url,
+                status: Status.INTERSHIP,
+              });
+            return studentUpdate;
+          } else if (Object.entries(student)[16][1] != null) {
+            const studentUpdate =
+              await this.universityService.UpdateStudentInformation(id, {
+                internshipCertification: Object.values(files)[0].url,
+              });
+            return studentUpdate;
+          }
+        } else {
+          return {};
+        }
+      }
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Patch('student/import-internshipReport')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  public async importInternshipReport(
+    @Query('id') id: string,
+    @UploadedFiles() Files: { files?: Express.Multer.File[] },
+  ) {
+    try {
+      const student = await this.universityService.getStudentByIdForClient(id);
+      if (Object.entries(student)[0] == undefined || !Files) {
+        throw new HttpException(
+          'This student does not exist in our system or you do not attach essential file...',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        if (Object.entries(student)[15][1] == null) {
+          throw new HttpException(
+            'This student does not have internship certification, please upload its first...',
+            HttpStatus.BAD_REQUEST,
+          );
+        } else if (Object.entries(student)[15][1] != null) {
+          await this.uploadImages(Object.entries(student)[0][1], Files.files);
+          const { files } = await this.getImages(Object.entries(student)[0][1]);
+          if (Object.values(files)[0].url != null) {
+            const studentUpdate =
+              await this.universityService.UpdateStudentInformation(id, {
+                internshipReport: Object.values(files)[0].url,
+                status: Status.COMPLETED,
+              });
+            return studentUpdate;
+          } else {
+            return {};
+          }
+        }
+      }
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Post('teacher/import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
   public async AddNewTeacherByImport(
@@ -431,13 +518,52 @@ export class UniversityController {
     @Body() dto: UpdateStudentDto,
   ) {
     try {
-      dto.fullName =
-        dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-      const result = await this.universityService.UpdateStudentInformation(
-        id,
-        dto,
-      );
-      return result;
+      const student = await this.universityService.getStudentByIdForClient(id);
+      if (Object.entries(student)[0] == undefined) {
+        throw new HttpException(
+          'This student does not exist in our system...',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else if (Object.entries(student)[16][1] == null) {
+        if (dto.internshipCertification == null) {
+          dto.status = Status.NONINTERNSHIP;
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            { ...dto },
+          );
+          return result;
+        } else {
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            dto,
+          );
+          return result;
+        }
+      } else if (Object.entries(student)[16][1] != null) {
+        console.log(Object.entries(student)[16][1]);
+        if (dto.internshipCertification == null) {
+          dto.status = Status.INTERSHIP.toString();
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            dto,
+          );
+          return result;
+        } else {
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            dto,
+          );
+          return result;
+        }
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

@@ -1,7 +1,7 @@
-import { authPackageProvideToken } from './../../../constants/authService.constant';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { authPackageProvideToken } from '../../../common/constants/authService.constant';
 
 export const authProvider = [
   {

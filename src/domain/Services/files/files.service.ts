@@ -1,7 +1,7 @@
 import { Controller, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { catchError, map, Observable, of, tap } from 'rxjs';
-import { filesPackageProvideToken } from '../../../constants/fileService.constant';
+import { filesPackageProvideToken } from '../../../common/constants/fileService.constant';
 import {
   GetAllForOwnerRequest,
   GetAllForOwnerResponse,
