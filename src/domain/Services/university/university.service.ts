@@ -110,7 +110,7 @@ export class UniversityService {
         'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
-          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport',
+          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport,@internshipGrade=:internshipGrade',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -129,6 +129,7 @@ export class UniversityService {
             nameTeacher: addNewStudentsDto.nameTeacher,
             internshipCertification: addNewStudentsDto.internshipCertification,
             internshipReport: addNewStudentsDto.internshipReport,
+            internshipGrade: addNewStudentsDto.internshipGrade,
             slug,
           },
           raw: true,
@@ -150,7 +151,7 @@ export class UniversityService {
         'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
-          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport',
+          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport,@internshipGrade=:internshipGrade',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -172,6 +173,7 @@ export class UniversityService {
             internshipCertification:
               updateStudentDto.internshipCertification ?? null,
             internshipReport: updateStudentDto.internshipReport ?? null,
+            internshipGrade: updateStudentDto.internshipGrade ?? null,
           },
           raw: true,
           mapToModel: true,

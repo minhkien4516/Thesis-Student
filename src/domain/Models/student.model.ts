@@ -18,6 +18,7 @@ export class Student extends Model {
   nameTeacher: string;
   internshipCertification: string;
   internshipReport: string;
+  internshipGrade: number;
   isActive: boolean;
   isRegistered: boolean;
   createdAt: Date | string;

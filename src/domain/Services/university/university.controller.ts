@@ -227,6 +227,7 @@ export class UniversityController {
           dto.internshipCertification =
             student['Phiếu tiếp nhận sinh viên thực tập'];
           dto.internshipReport = student['Phiếu báo cáo thực tập'];
+          dto.internshipGrade = student['Điểm'];
           const relevant = await this.universityService.addNewStudent({
             ...dto,
           });
@@ -331,14 +332,14 @@ export class UniversityController {
         await this.uploadImages(Object.entries(student)[0][1], Files.files);
         const { files } = await this.getImages(Object.entries(student)[0][1]);
         if (Object.values(files)[0].url != null) {
-          if (Object.entries(student)[16][1] == null) {
+          if (Object.entries(student)[16][1] == '') {
             const studentUpdate =
               await this.universityService.UpdateStudentInformation(id, {
                 internshipCertification: Object.values(files)[0].url,
-                status: Status.INTERSHIP,
+                status: Status.INTERNSHIP.toString(),
               });
             return studentUpdate;
-          } else if (Object.entries(student)[16][1] != null) {
+          } else if (Object.entries(student)[16][1] != '') {
             const studentUpdate =
               await this.universityService.UpdateStudentInformation(id, {
                 internshipCertification: Object.values(files)[0].url,
@@ -372,12 +373,12 @@ export class UniversityController {
           HttpStatus.BAD_REQUEST,
         );
       } else {
-        if (Object.entries(student)[15][1] == null) {
+        if (Object.entries(student)[15][1] == '') {
           throw new HttpException(
             'This student does not have internship certification, please upload its first...',
             HttpStatus.BAD_REQUEST,
           );
-        } else if (Object.entries(student)[15][1] != null) {
+        } else if (Object.entries(student)[15][1] != '') {
           await this.uploadImages(Object.entries(student)[0][1], Files.files);
           const { files } = await this.getImages(Object.entries(student)[0][1]);
           if (Object.values(files)[0].url != null) {
@@ -524,45 +525,62 @@ export class UniversityController {
           'This student does not exist in our system...',
           HttpStatus.BAD_REQUEST,
         );
-      } else if (Object.entries(student)[16][1] == null) {
-        if (dto.internshipCertification == null) {
-          dto.status = Status.NONINTERNSHIP;
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            { ...dto },
-          );
-          return result;
-        } else {
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            dto,
-          );
-          return result;
-        }
-      } else if (Object.entries(student)[16][1] != null) {
-        console.log(Object.entries(student)[16][1]);
-        if (dto.internshipCertification == null) {
-          dto.status = Status.INTERSHIP.toString();
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            dto,
-          );
-          return result;
-        } else {
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            dto,
-          );
-          return result;
-        }
+      } else if (
+        Object.entries(student)[16][1] == '' &&
+        dto.internshipCertification == ''
+      ) {
+        dto.status = Status.NONINTERNSHIP.toString();
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          dto,
+        );
+        return result;
+      } else if (
+        Object.entries(student)[15][1] == '' &&
+        dto.internshipReport == ''
+      ) {
+        dto.status = Status.NONINTERNSHIP.toString();
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          dto,
+        );
+        return result;
+      } else if (
+        Object.entries(student)[16][1] != '' &&
+        dto.internshipCertification == ''
+      ) {
+        dto.status = Status.INTERNSHIP.toString();
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          { ...dto },
+        );
+        return result;
+      } else if (
+        Object.entries(student)[15][1] != '' &&
+        dto.internshipReport == ''
+      ) {
+        dto.status = Status.INTERNSHIP.toString();
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          { ...dto },
+        );
+        return result;
+      } else {
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          dto,
+        );
+        return result;
       }
     } catch (error) {
       this.logger.error(error.message);

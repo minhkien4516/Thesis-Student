@@ -64,6 +64,10 @@ export class AddNewStudentsByImportDto {
   @IsOptional()
   @IsString()
   internshipReport?: string | null;
+
+  @IsOptional()
+  @IsString()
+  internshipGrade?: number | null;
 }
 
 export class AddNewStudentsDto {
