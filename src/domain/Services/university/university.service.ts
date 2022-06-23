@@ -14,6 +14,7 @@ import { UpdateTeacherDto } from './dtos/updateTeacher.dtos';
 import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 import { RegisterTeacherForStudentDto } from './dtos/registerTeacherForStudent.dtos';
+import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
 
 @Injectable()
 export class UniversityService {
@@ -252,7 +253,7 @@ export class UniversityService {
     }
   }
 
-  public async getAllStudents(): Promise<SaveStudentAccountForOwnerResponse> {
+  public async getAllStudents(): Promise<SaveStudentAccountForOwnerRequest> {
     try {
       const students = await this.sequelize.query('SP_GetAllStudents', {
         type: QueryTypes.SELECT,

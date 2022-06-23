@@ -39,10 +39,25 @@ export class RésumeController {
   public async addNewRésume(
     @Query('studentId') studentId: string,
     @Body() addNewRésume: AddNewRésumeDto,
-    @UploadedFiles() files: { files?: Express.Multer.File[] },
   ): Promise<RésumeFilter[]> {
     try {
-      console.log(files);
+      if (Object.values(JSON.parse(addNewRésume.files)).length <= 0) {
+        throw new HttpException('Cannot add image', HttpStatus.BAD_REQUEST);
+      }
+      const encodedFile = Object.values(JSON.parse(addNewRésume.files))[0];
+      const images = await Buffer.from(encodedFile[0].uri, 'utf-8');
+
+      const files = {
+        files: [
+          {
+            fieldname: 'files',
+            originalname: encodedFile[0].originalname,
+            encoding: '7bit',
+            mimetype: encodedFile[0].mimetype,
+            buffer: images,
+          },
+        ],
+      };
       const result = await this.résumeService.addNewRésume({
         ...addNewRésume,
       });
@@ -141,7 +156,7 @@ export class RésumeController {
 
   public async uploadImages(
     corporationId: string,
-    filesParam: Express.Multer.File[],
+    filesParam: any[],
   ): Promise<UploadFilesForOwnerResponse> {
     const file = filesParam.map((index) => ({
       filename: index.originalname,

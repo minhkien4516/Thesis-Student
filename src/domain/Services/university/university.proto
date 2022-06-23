@@ -118,6 +118,20 @@ message StudentFilter {
     string internshipCertification = 16;
     string internshipReport = 17;
     repeated CV cv = 18;
+    repeated Teacher teacher = 19;
+}
+message Teacher {
+    string teacherId=1;
+    string lastName=2;
+    string firstName=3;
+    string fullName=4;
+    string email=5;
+    string department=6;
+    string phoneNumber=7;
+    string position=8;
+    string studentAmount=9;
+    string maximumStudentAmount=10;
+    string slug=11;
 }
 
 message CV {

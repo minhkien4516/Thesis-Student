@@ -107,6 +107,21 @@ export interface StudentFilter {
       }>;
     },
   ];
+  teacher?: [
+    {
+      teacherId?: string;
+      lastName?: string;
+      firstName?: string;
+      fullName?: string;
+      email?: string;
+      department?: string;
+      position?: string;
+      phoneNumber?: string;
+      studentAmount?: number;
+      maximumStudentAmount?: number;
+      slug?: string;
+    },
+  ];
 }
 export interface StudentsFilterResponse {
   data: StudentsFilter[];

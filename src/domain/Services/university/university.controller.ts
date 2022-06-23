@@ -248,12 +248,13 @@ export class UniversityController {
   public async generateAcountStudent() {
     try {
       const student = await this.universityService.getAllStudents();
-      await student.students.map((item) => {
+      student.students.map((item) => {
         item.role = 'student';
         item.password = item.phoneNumber;
         item.studentId = item.studentId;
       });
-      return await this.saveStudents(student);
+      const data = await this.saveStudents(student);
+      return data;
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -271,8 +272,8 @@ export class UniversityController {
       const student = await this.universityService.getStudentByIdForClient(
         data.id,
       );
-      console.log(Object.values(student));
-      if (Object.values(student) == undefined) {
+      console.log(student);
+      if (Object.values(student)[0] == undefined) {
         return {};
       } else {
         await Promise.all(
