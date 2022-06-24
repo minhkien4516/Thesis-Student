@@ -53,6 +53,7 @@ import {
 } from '../../../common/constants/authService.constant';
 import { getStudentByIdForLoginRequest } from '../../interfaces/getStudentByIdForLoginRequest';
 import { Status } from '../../../common/enums/status.enum';
+import { Role } from '../../../common/enums/role.enum';
 
 @Controller('university')
 export class UniversityController {
@@ -245,16 +246,22 @@ export class UniversityController {
   }
 
   @Get('student/generate-account')
-  public async generateAcountStudent() {
+  public async generateAccountStudent() {
     try {
       const student = await this.universityService.getAllStudents();
-      student.students.map((item) => {
-        item.role = 'student';
-        item.password = item.phoneNumber;
-        item.studentId = item.studentId;
-      });
-      const data = await this.saveStudents(student);
-      return data;
+      if (student.students.length > 0) {
+        await student.students.map((item) => {
+          item.role = Role.student;
+          item.password = item.phoneNumber;
+        });
+        await this.saveStudents(student);
+
+        return {
+          message: 'Generate account successfully',
+          status: HttpStatus.OK,
+        };
+      }
+      return { student: [] };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

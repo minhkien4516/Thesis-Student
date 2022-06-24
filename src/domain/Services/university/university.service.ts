@@ -253,7 +253,7 @@ export class UniversityService {
     }
   }
 
-  public async getAllStudents(): Promise<SaveStudentAccountForOwnerRequest> {
+  public async getAllStudents(): Promise<SaveStudentAccountForOwnerResponse> {
     try {
       const students = await this.sequelize.query('SP_GetAllStudents', {
         type: QueryTypes.SELECT,
