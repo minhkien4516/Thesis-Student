@@ -749,6 +749,56 @@ export class UniversityController {
     }
   }
 
+  
+  @Get('student/condition')
+  public async GetAllStudentsInUniversityByCondition(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+    @Query('term') term:string,
+    @Query('fullName') fullName:string
+  ): Promise<StudentsFilterResponse> {
+    try {
+      const data = await this.universityService.getAllStudentForClientByCondition(
+        limit,
+        offset,
+        term,
+        fullName
+      );
+      const total =
+        await this.universityService.getTotalStudentsInUniversityForClientByCondition(term,fullName);
+      if (Object.values(total)[0] > 0 && data.length > 0) {
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant =
+              await this.universityService.getAllDataForStudentByStudentId(
+                item.id,
+              );
+            console.log(typeof Object.keys(relevant)[0]);
+            if (typeof Object.keys(relevant)[0] == 'undefined') {
+              return (item.details = []);
+            } else if (typeof Object.keys(relevant)[0] == 'string') {
+              item.details = [relevant];
+              const { files } = await this.getImages(item.details[0].cv[0].id);
+              item.details[0].cv[0].images = files;
+              return {
+                details: item.details,
+                images: item.details[0].cv[0].images,
+              };
+            }
+          }),
+        );
+        return { data, pagination: total };
+      }
+      return { data: [], pagination: { total: 0 } };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('student/filter')
   public async getStudentByConditions(
     @Query('limit') limit: number,

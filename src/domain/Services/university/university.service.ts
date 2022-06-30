@@ -253,6 +253,33 @@ export class UniversityService {
     }
   }
 
+  public async getAllStudentForClientByCondition(
+    limit?: number,
+    offset?: number,
+    term?: string,
+    fullName?: string,
+  ): Promise<StudentsFilter[]> {
+    try {
+      if (limit < 1 || offset < 0) return [];
+      const total: StudentsFilter[] = await this.sequelize.query(
+        'SP_GetAllStudentsByTerm @limit=:limit,@offset=:offset,@term=:term,@fullName=:fullName',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            limit,
+            offset,
+            term,
+            fullName,
+          },
+        },
+      );
+      return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getAllStudents(): Promise<SaveStudentAccountForOwnerResponse> {
     try {
       const students = await this.sequelize.query('SP_GetAllStudents', {
@@ -382,6 +409,31 @@ export class UniversityService {
     }
   }
 
+  async getTotalStudentsInUniversityForClientByCondition(
+    term?: string,
+    fullName?: string,
+  ) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetTotalStudentsByTerm @term=:term,@fullName=:fullName',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            term,
+            fullName,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Student,
+        },
+      );
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   async getTotalTeachersInUniversityForClient() {
     try {
       const total = await this.sequelize.query('SP_GetTotalTeachersForClient', {
@@ -437,7 +489,7 @@ export class UniversityService {
     try {
       const total: StudentsFilter[] = await this.sequelize.query(
         'SP_GetStudentByConditions @identityNumber=:identityNumber,@fullName=:fullName, @limit=:limit,' +
-          '@offset=:offset,@status=:status',
+          '@offset=:offset,@status=:status,@term=:term',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -445,6 +497,7 @@ export class UniversityService {
             limit,
             offset,
             identityNumber: filterStudentDto.identityNumber ?? null,
+            term: filterStudentDto.term ?? null,
             status: filterStudentDto.status ?? null,
           },
           raw: true,
@@ -488,13 +541,14 @@ export class UniversityService {
   async getTotalFilterStudentByConditions(filterStudentDto?: FilterStudentDto) {
     try {
       const total = await this.sequelize.query(
-        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status',
+        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status,@term=:term',
         {
           type: QueryTypes.SELECT,
           replacements: {
             fullName: filterStudentDto?.fullName.trim(),
             status: filterStudentDto?.status,
             identityNumber: filterStudentDto?.identityNumber,
+            term: filterStudentDto?.term,
           },
           raw: true,
         },

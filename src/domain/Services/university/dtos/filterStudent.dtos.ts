@@ -7,10 +7,13 @@ export class FilterStudentDto {
 
   @IsOptional()
   @IsString()
+  term?: string | null;
+
+  @IsOptional()
+  @IsString()
   fullName?: string | null;
 
   @IsOptional()
   @IsString()
-  @MaxLength(13)
   status?: string | null;
 }
