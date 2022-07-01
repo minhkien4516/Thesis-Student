@@ -15,6 +15,7 @@ import { FilterTeacherDto } from './dtos/filterTeacher.dtos';
 import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 import { RegisterTeacherForStudentDto } from './dtos/registerTeacherForStudent.dtos';
 import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
+import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 
 @Injectable()
 export class UniversityService {
@@ -293,6 +294,19 @@ export class UniversityService {
     }
   }
 
+  public async getAllTeachers(): Promise<SaveTeacherAccountForOwnerResponse> {
+    try {
+      const teachers = await this.sequelize.query('SP_GetAllTeachers', {
+        type: QueryTypes.SELECT,
+        raw: true,
+      });
+      return { teachers };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getStudentById(
     id: string,
   ): Promise<SaveStudentAccountForOwnerResponse> {
@@ -376,6 +390,18 @@ export class UniversityService {
         },
       );
       return identityNumber;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllTermForClient() {
+    try {
+      const Term = await this.sequelize.query('SP_GetAllTerm', {
+        type: QueryTypes.SELECT,
+      });
+      return Term;
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

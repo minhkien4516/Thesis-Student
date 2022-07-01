@@ -1,40 +1,40 @@
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class AddNewProjectDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   projectName?: string | null;
 
   @IsString()
-  @IsNotEmpty()
-  startDate?: Date | null;
+  @IsOptional()
+  startDate?: string | null;
 
   @IsString()
-  @IsNotEmpty()
-  endDate?: Date | null;
+  @IsOptional()
+  endDate?: string | null;
 
   @IsNumber()
-  @IsNotEmpty()
-  teamSize?: Date | null;
+  @IsOptional()
+  teamSize?: number | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   role?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   responsibilities?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   sourceLink?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   technology?: [AddNewTechnologiesDto];
 }
 
@@ -44,10 +44,10 @@ export class AddNewProjectsDto {
 
 export class AddNewTechnologiesDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   title?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   content?: number | null;
 }

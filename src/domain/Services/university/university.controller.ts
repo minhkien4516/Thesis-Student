@@ -54,6 +54,8 @@ import {
 import { getStudentByIdForLoginRequest } from '../../interfaces/getStudentByIdForLoginRequest';
 import { Status } from '../../../common/enums/status.enum';
 import { Role } from '../../../common/enums/role.enum';
+import { SaveTeacherAccountForOwnerRequest } from '../../interfaces/saveTeacherAccountForOwnerRequest.interface';
+import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 
 @Controller('university')
 export class UniversityController {
@@ -270,6 +272,33 @@ export class UniversityController {
       );
     }
   }
+
+  @Get('teacher/generate-account')
+  public async generateAccountTeacher() {
+    try {
+      const teacher = await this.universityService.getAllTeachers();
+      if (teacher.teachers.length > 0) {
+        await teacher.teachers.map((item) => {
+          item.role = Role.teacher;
+          item.password = item.phoneNumber;
+        });
+        await this.saveTeachers(teacher);
+
+        return {
+          message: 'Generate account successfully',
+          status: HttpStatus.OK,
+        };
+      }
+      return { teacher: [] };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @GrpcMethod('UniversityService')
   async getStudentByIdGrpc(
     data: getStudentByIdForLoginRequest,
@@ -636,6 +665,20 @@ export class UniversityController {
     }
   }
 
+  @Get('student/term')
+  public async getAllTerm() {
+    try {
+      const result = await this.universityService.getAllTermForClient();
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('student/class')
   public async getAllClass() {
     try {
@@ -749,23 +792,26 @@ export class UniversityController {
     }
   }
 
-  
   @Get('student/condition')
   public async GetAllStudentsInUniversityByCondition(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
-    @Query('term') term:string,
-    @Query('fullName') fullName:string
+    @Query('term') term: string,
+    @Query('fullName') fullName: string,
   ): Promise<StudentsFilterResponse> {
     try {
-      const data = await this.universityService.getAllStudentForClientByCondition(
-        limit,
-        offset,
-        term,
-        fullName
-      );
+      const data =
+        await this.universityService.getAllStudentForClientByCondition(
+          limit,
+          offset,
+          term,
+          fullName,
+        );
       const total =
-        await this.universityService.getTotalStudentsInUniversityForClientByCondition(term,fullName);
+        await this.universityService.getTotalStudentsInUniversityForClientByCondition(
+          term,
+          fullName,
+        );
       if (Object.values(total)[0] > 0 && data.length > 0) {
         await Promise.all(
           data.map(async (item) => {
@@ -948,6 +994,20 @@ export class UniversityController {
           error.message,
       );
       return { students: [] };
+    }
+  }
+
+  public async saveTeachers(
+    data: SaveTeacherAccountForOwnerRequest,
+  ): Promise<SaveTeacherAccountForOwnerResponse> {
+    try {
+      return await firstValueFrom(this.authService.registerTeacher(data));
+    } catch (error) {
+      this.logger.error(
+        'Error when generate account for student from user service: ' +
+          error.message,
+      );
+      return { teachers: [] };
     }
   }
 }

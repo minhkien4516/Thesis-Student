@@ -30,6 +30,7 @@ export class ProjectController {
       const multiProject = await Promise.all(
         addNewProjectsDto.project.map(async (item) => {
           const Project = await this.projectService.addNewProject(item);
+          console.log(Project);
           await this.projectService.addResumeProject({
             projectId: Project.id,
             cvId,

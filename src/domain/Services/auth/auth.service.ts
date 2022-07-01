@@ -5,11 +5,16 @@ import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentA
 import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudentAccountForOwnerResponse.interface';
 import { Observable } from 'rxjs';
 import { authPackageProvideToken } from '../../../common/constants/authService.constant';
+import { SaveTeacherAccountForOwnerRequest } from '../../interfaces/saveTeacherAccountForOwnerRequest.interface';
+import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 
 interface IAuthService {
   registerStudent(
     data: SaveStudentAccountForOwnerRequest,
   ): Observable<SaveStudentAccountForOwnerResponse>;
+  registerTeacher(
+    data: SaveTeacherAccountForOwnerRequest,
+  ): Observable<SaveTeacherAccountForOwnerResponse>;
 }
 
 @Controller()
@@ -30,5 +35,11 @@ export class AuthService implements IAuthService, OnModuleInit {
     data: SaveStudentAccountForOwnerRequest,
   ): Observable<SaveStudentAccountForOwnerResponse> {
     return this.authService.registerStudent(data);
+  }
+
+  registerTeacher(
+    data: SaveTeacherAccountForOwnerRequest,
+  ): Observable<SaveTeacherAccountForOwnerResponse> {
+    return this.authService.registerTeacher(data);
   }
 }

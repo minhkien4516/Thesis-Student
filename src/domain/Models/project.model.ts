@@ -3,8 +3,8 @@ import { Model } from 'sequelize-typescript';
 export class Project extends Model {
   id: string;
   projectName: string;
-  startDate: Date | string;
-  endDate: Date | string;
+  startDate: string;
+  endDate: string;
   teamSize: number;
   role: string;
   responsibilities: string;
