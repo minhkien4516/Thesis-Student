@@ -5,6 +5,7 @@ package university;
 service UniversityService {
     rpc GetResumeForClient (ResumeFilterRequest) returns (ResumeFilterResponse);
     rpc GetStudentByIdGrpc (getStudentbyIdForLoginRequest) returns (StudentFilter);
+    rpc GetTeacherByIdGrpc (getTeacherByIdForLoginRequest) returns (TeacherDetail);
 }
 
 message ResumeFilterRequest {
@@ -31,6 +32,10 @@ message Student {
     string status = 12;
     string academicYear = 13;
     string slug = 14;
+    string nameTeacher = 15;
+    string internshipCertification = 16;
+    string internshipReport = 17;
+    string internshipGrade = 18;
 }
 
 message Contact {
@@ -99,6 +104,15 @@ message getStudentbyIdForLoginRequest{
     string id = 1;
 }
 
+message getTeacherByIdForLoginRequest{
+    string id = 1;
+}
+
+message TeacherDetail {
+    repeated Teacher teacher = 1;
+    repeated Student student = 2;
+}
+
 message StudentFilter {
     string id = 1;
     string firstName = 2;
@@ -117,8 +131,9 @@ message StudentFilter {
     string slug = 15;
     string internshipCertification = 16;
     string internshipReport = 17;
-    repeated CV cv = 18;
-    repeated Teacher teacher = 19;
+    string internshipGrade = 18;
+    repeated CV cv = 19;
+    repeated Teacher teacher = 20;
 }
 message Teacher {
     string teacherId=1;
@@ -129,8 +144,8 @@ message Teacher {
     string department=6;
     string phoneNumber=7;
     string position=8;
-    string studentAmount=9;
-    string maximumStudentAmount=10;
+    int32  studentAmount=9;
+    int32  maximumStudentAmount=10;
     string slug=11;
 }
 

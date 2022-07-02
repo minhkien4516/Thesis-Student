@@ -50,12 +50,14 @@ import { RésumeService } from '../résume/résume.service';
 import {
   MAIL_STUDENT,
   STUDENT_ROLE,
+  TEACHER_ROLE,
 } from '../../../common/constants/authService.constant';
 import { getStudentByIdForLoginRequest } from '../../interfaces/getStudentByIdForLoginRequest';
 import { Status } from '../../../common/enums/status.enum';
 import { Role } from '../../../common/enums/role.enum';
 import { SaveTeacherAccountForOwnerRequest } from '../../interfaces/saveTeacherAccountForOwnerRequest.interface';
 import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
+import { getTeacherByIdForLoginRequest } from '../../interfaces/getTeacherByIdForLoginRequest ';
 
 @Controller('university')
 export class UniversityController {
@@ -253,6 +255,7 @@ export class UniversityController {
       const student = await this.universityService.getAllStudents();
       if (student.students.length > 0) {
         await student.students.map((item) => {
+          item.teacherId = '';
           item.role = Role.student;
           item.password = item.phoneNumber;
         });
@@ -280,6 +283,7 @@ export class UniversityController {
       if (teacher.teachers.length > 0) {
         await teacher.teachers.map((item) => {
           item.role = Role.teacher;
+          item.studentId = '';
           item.password = item.phoneNumber;
         });
         await this.saveTeachers(teacher);
@@ -290,6 +294,25 @@ export class UniversityController {
         };
       }
       return { teacher: [] };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @GrpcMethod('UniversityService')
+  async getTeacherByIdGrpc(
+    data: getTeacherByIdForLoginRequest,
+  ): Promise<TeacherDetail> {
+    if (data.id.trim() == '') return {};
+    try {
+      const teacher = await this.universityService.getTeacherById(data.id);
+      if (Object.values(teacher)[0][0] === undefined) return {};
+      console.log(teacher);
+      return teacher;
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -506,7 +529,7 @@ export class UniversityController {
             '';
           const students = await this.universityService.addNewStudent(student);
           students.map(async (item) => {
-            const student = await this.universityService.getStudentById(
+            const student = await this.universityService.getStudentByIds(
               item.id,
             );
             student.students.map((item) => {
@@ -537,6 +560,17 @@ export class UniversityController {
           teacher.fullName =
             teacher.lastName.concat(' ', teacher.firstName) || ' ';
           const teachers = await this.universityService.addNewTeacher(teacher);
+          teachers.map(async (item) => {
+            const teacher = await this.universityService.getTeacherByIds(
+              item.id,
+            );
+            teacher.teachers.map((item) => {
+              item.role = TEACHER_ROLE;
+              item.password = item.phoneNumber;
+              item.teacherId = item.teacherId;
+            });
+            await this.saveTeachers(teacher);
+          });
           return teachers[0];
         }),
       );

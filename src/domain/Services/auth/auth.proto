@@ -15,6 +15,7 @@ message SaveStudent {
     string phoneNumber = 5;
     string role = 6;
     string studentId = 7;
+    string teacherId = 8;
 }
 
 message SaveTeacher {
@@ -24,7 +25,8 @@ message SaveTeacher {
     string lastName = 4;
     string phoneNumber = 5;
     string role = 6;
-    string teacherId = 7;
+    string studentId = 7;
+    string teacherId = 8;
 }
 
 message SaveStudentAccountForOwnerRequest {
@@ -37,9 +39,9 @@ message SaveStudentAccountForOwnerResponse {
 
 
 message SaveTeacherAccountForOwnerRequest {
-    repeated SaveStudent teachers = 1;
+    repeated SaveTeacher teachers = 1;
 }
 
 message SaveTeacherAccountForOwnerResponse {
-    repeated SaveStudent teachers = 1;
+    repeated SaveTeacher teachers = 1;
 }

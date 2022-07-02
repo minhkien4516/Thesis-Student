@@ -57,6 +57,7 @@ export interface TeacherDetail {
       nameTeacher?: string;
       internshipCertification?: string;
       internshipReport?: string;
+      internshipGrade?: string;
       isActive: boolean;
       isRegistered: boolean;
       createdAt: string;

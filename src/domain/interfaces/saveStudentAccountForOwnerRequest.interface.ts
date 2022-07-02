@@ -7,5 +7,6 @@ export interface SaveStudentAccountForOwnerRequest {
     phoneNumber?: string | null;
     role?: string | null;
     studentId?: string | null;
+    teacherId?: string | null;
   }>;
 }

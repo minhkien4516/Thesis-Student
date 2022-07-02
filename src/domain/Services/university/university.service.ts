@@ -307,12 +307,12 @@ export class UniversityService {
     }
   }
 
-  public async getStudentById(
+  public async getStudentByIds(
     id: string,
   ): Promise<SaveStudentAccountForOwnerResponse> {
     try {
       const students = await this.sequelize.query(
-        'SP_GetStudentById @id=:id ',
+        'SP_GetStudentByIds @id=:id ',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -322,6 +322,27 @@ export class UniversityService {
         },
       );
       return { students };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getTeacherByIds(
+    id: string,
+  ): Promise<SaveTeacherAccountForOwnerResponse> {
+    try {
+      const teachers = await this.sequelize.query(
+        'SP_GetTeacherByIds @id=:id ',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+          },
+          raw: true,
+        },
+      );
+      return { teachers };
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);
