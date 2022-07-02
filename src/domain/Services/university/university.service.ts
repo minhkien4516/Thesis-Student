@@ -99,6 +99,42 @@ export class UniversityService {
     }
   }
 
+  public async acceptedStudentRegistration(dto: RegisterTeacherForStudentDto) {
+    try {
+      const accepted = await this.sequelize.query(
+        'SP_AcceptedStudentRegistration @teacherId=:teacherId, @studentId=:studentId',
+        {
+          type: QueryTypes.SELECT,
+          replacements: { teacherId: dto.teacherId, studentId: dto.studentId },
+          raw: true,
+        },
+      );
+      return accepted[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async unacceptedStudentRegistration(
+    dto: RegisterTeacherForStudentDto,
+  ) {
+    try {
+      const unaccepted = await this.sequelize.query(
+        'SP_UnAcceptedStudentRegistration @teacherId=:teacherId, @studentId=:studentId',
+        {
+          type: QueryTypes.SELECT,
+          replacements: { teacherId: dto.teacherId, studentId: dto.studentId },
+          raw: true,
+        },
+      );
+      return unaccepted[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async addNewStudent(
     addNewStudentsDto: AddNewStudentsByImportDto,
   ): Promise<StudentsFilter[]> {

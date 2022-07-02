@@ -1,5 +1,8 @@
 import { StudentFilter } from './../../interfaces/getStudentForClients.interface';
-import { RegisterTeacherForStudentsDto } from './dtos/registerTeacherForStudent.dtos';
+import {
+  RegisterTeacherForStudentDto,
+  RegisterTeacherForStudentsDto,
+} from './dtos/registerTeacherForStudent.dtos';
 import {
   Body,
   Controller,
@@ -147,6 +150,31 @@ export class UniversityController {
         error?.status || HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
+  }
+
+  @Patch('/student/accepted-registration')
+  async acceptStudentRegistration(@Body() dto: RegisterTeacherForStudentDto) {
+    try {
+      const accepted = await this.universityService.acceptedStudentRegistration(
+        dto,
+      );
+      return {
+        accepted,
+        message: 'Successfully accepted',
+      };
+    } catch (error) {}
+  }
+
+  @Patch('/student/unaccepted-registration')
+  async unacceptStudentRegistration(@Body() dto: RegisterTeacherForStudentDto) {
+    try {
+      const accepted =
+        await this.universityService.unacceptedStudentRegistration(dto);
+      return {
+        accepted,
+        message: 'Successfully unaccepted',
+      };
+    } catch (error) {}
   }
 
   @Patch('/student/unregister-teacher')
