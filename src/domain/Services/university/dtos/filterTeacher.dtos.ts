@@ -11,6 +11,5 @@ export class FilterTeacherDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(13)
   department?: string | null;
 }
