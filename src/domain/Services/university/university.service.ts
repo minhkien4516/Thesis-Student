@@ -116,19 +116,17 @@ export class UniversityService {
     }
   }
 
-  public async unacceptedStudentRegistration(
-    dto: RegisterTeacherForStudentDto,
-  ) {
+  public async rejectedStudentRegistration(dto: RegisterTeacherForStudentDto) {
     try {
-      const unaccepted = await this.sequelize.query(
-        'SP_UnAcceptedStudentRegistration @teacherId=:teacherId, @studentId=:studentId',
+      const Rejected = await this.sequelize.query(
+        'SP_RejectedStudentRegistration @teacherId=:teacherId, @studentId=:studentId',
         {
           type: QueryTypes.SELECT,
           replacements: { teacherId: dto.teacherId, studentId: dto.studentId },
           raw: true,
         },
       );
-      return unaccepted[0];
+      return Rejected[0];
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);
