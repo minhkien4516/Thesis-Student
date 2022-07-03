@@ -1,3 +1,4 @@
+import { Teacher } from './../../Models/teacher.model';
 import { StudentFilter } from './../../interfaces/getStudentForClients.interface';
 import {
   RegisterTeacherForStudentDto,
@@ -153,16 +154,25 @@ export class UniversityController {
   }
 
   @Patch('/student/accepted-registration')
-  async acceptStudentRegistration(@Body() dto: RegisterTeacherForStudentDto) {
+  async acceptStudentRegistration(@Body() dto: RegisterTeacherForStudentsDto) {
     try {
-      const accepted = await this.universityService.acceptedStudentRegistration(
-        dto,
+      const accepted = await Promise.all(
+        dto.teacher.map(async (item) => {
+          const temp = this.universityService.acceptedStudentRegistration(item);
+          return {
+            temp,
+            message: 'Successfully accepted',
+          };
+        }),
       );
-      return {
-        accepted,
-        message: 'Successfully accepted',
-      };
-    } catch (error) {}
+      return accepted;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
   }
 
   @Patch('/student/rejected-registration')
@@ -175,7 +185,13 @@ export class UniversityController {
         accepted,
         message: 'Successfully rejected',
       };
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
   }
 
   @Patch('/student/unregister-teacher')
@@ -250,11 +266,12 @@ export class UniversityController {
           dto.email = (
             student['Mã số SV'].toLowerCase() + MAIL_STUDENT
           ).toString();
-          dto.term = dto.academicYear =
+          dto.term =
             'K' +
             (
               parseInt(student['Mã số SV'].split(/(?<=^(?:.{2})+)(?!$)/)[0]) + 6
             ).toString();
+          dto.academicYear = student['Năm học'];
           dto.phoneNumber = student['Số điện thoại'];
           dto.status = student['Trạng thái'];
           dto.nameTeacher = student['GVHD'];
@@ -279,9 +296,11 @@ export class UniversityController {
   }
 
   @Get('student/generate-account')
-  public async generateAccountStudent() {
+  public async generateAccountStudent(
+    @Query('academicYear') academicYear: string,
+  ) {
     try {
-      const student = await this.universityService.getAllStudents();
+      const student = await this.universityService.getAllStudents(academicYear);
       if (student.students.length > 0) {
         await student.students.map((item) => {
           item.teacherId = '';
@@ -306,9 +325,11 @@ export class UniversityController {
   }
 
   @Get('teacher/generate-account')
-  public async generateAccountTeacher() {
+  public async generateAccountTeacher(
+    @Query('academicYear') academicYear: string,
+  ) {
     try {
-      const teacher = await this.universityService.getAllTeachers();
+      const teacher = await this.universityService.getAllTeachers(academicYear);
       if (teacher.teachers.length > 0) {
         await teacher.teachers.map((item) => {
           item.role = Role.teacher;
@@ -518,6 +539,7 @@ export class UniversityController {
           dto.department = teacher['Bộ môn'];
           dto.lastName = teacher['Họ và tên đệm'] || '';
           dto.firstName = teacher['Tên'] || '';
+          dto.academicYear = teacher['Năm học'];
           dto.fullName = dto.lastName.concat(' ', dto.firstName) || '';
           dto.email = teacher['Địa chỉ email'];
           dto.phoneNumber = teacher['Điện thoại'];
@@ -546,7 +568,7 @@ export class UniversityController {
         dto.students.map(async (student) => {
           student.fullName =
             student.lastName.concat(' ', student.firstName) || ' ';
-          student.term = student.academicYear =
+          student.term =
             'K' +
               (
                 parseInt(
@@ -782,10 +804,29 @@ export class UniversityController {
   }
 
   @Get('student/identityNumber')
-  public async getAllIdentityNumber() {
+  public async getAllIdentityNumber(
+    @Query('academicYear') academicYear: string,
+  ) {
     try {
-      const result =
-        await this.universityService.getAllIdentityNumberForClient();
+      const result = await this.universityService.getAllIdentityNumberForClient(
+        academicYear,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('teacher/fullName')
+  public async getAllTeacherName(@Query('academicYear') academicYear: string) {
+    try {
+      const result = await this.universityService.getAllTeacherName(
+        academicYear,
+      );
       return result;
     } catch (error) {
       this.logger.error(error.message);
@@ -797,9 +838,11 @@ export class UniversityController {
   }
 
   @Get('student/term')
-  public async getAllTerm() {
+  public async getAllTerm(@Query('academicYear') academicYear: string) {
     try {
-      const result = await this.universityService.getAllTermForClient();
+      const result = await this.universityService.getAllTermForClient(
+        academicYear,
+      );
       return result;
     } catch (error) {
       this.logger.error(error.message);
@@ -811,9 +854,11 @@ export class UniversityController {
   }
 
   @Get('student/class')
-  public async getAllClass() {
+  public async getAllClass(@Query('academicYear') academicYear: string) {
     try {
-      const result = await this.universityService.getAllClassForClient();
+      const result = await this.universityService.getAllClassForClient(
+        academicYear,
+      );
       return result;
     } catch (error) {
       this.logger.error(error.message);
@@ -828,14 +873,18 @@ export class UniversityController {
   public async GetAllTeachersInUniversity(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
+    @Query('academicYear') academicYear: string,
   ): Promise<TeachersFilterResponse> {
     try {
       const data = await this.universityService.getAllTeacherForClient(
+        academicYear,
         limit,
         offset,
       );
       const total =
-        await this.universityService.getTotalTeachersInUniversityForClient();
+        await this.universityService.getTotalTeachersInUniversityForClient(
+          academicYear,
+        );
       if (Object.values(total)[0] > 0 && data.length > 0)
         return { data, pagination: total };
       return { data: [], pagination: { total: 0 } };
@@ -863,10 +912,14 @@ export class UniversityController {
   }
 
   @Get('teacher/all')
-  public async GetAllTeachersInUniversityNotPagination() {
+  public async GetAllTeachersInUniversityNotPagination(
+    @Query('academicYear') academicYear: string,
+  ) {
     try {
       const data =
-        await this.universityService.getAllTeacherForClientNotPagination();
+        await this.universityService.getAllTeacherForClientNotPagination(
+          academicYear,
+        );
       if (data.length > 0) return { data };
       return { data: [] };
     } catch (error) {
@@ -882,14 +935,18 @@ export class UniversityController {
   public async GetAllStudentsInUniversity(
     @Query('limit') limit: number,
     @Query('offset') offset: number,
+    @Query('academicYear') academicYear: string,
   ): Promise<StudentsFilterResponse> {
     try {
       const data = await this.universityService.getAllStudentForClient(
         limit,
         offset,
+        academicYear,
       );
       const total =
-        await this.universityService.getTotalStudentsInUniversityForClient();
+        await this.universityService.getTotalStudentsInUniversityForClient(
+          academicYear,
+        );
       if (Object.values(total)[0] > 0 && data.length > 0) {
         await Promise.all(
           data.map(async (item) => {
@@ -929,6 +986,7 @@ export class UniversityController {
     @Query('offset') offset: number,
     @Query('term') term: string,
     @Query('fullName') fullName: string,
+    @Query('academicYear') academicYear: string,
   ): Promise<StudentsFilterResponse> {
     try {
       const data =
@@ -937,11 +995,13 @@ export class UniversityController {
           offset,
           term,
           fullName,
+          academicYear,
         );
       const total =
         await this.universityService.getTotalStudentsInUniversityForClientByCondition(
           term,
           fullName,
+          academicYear,
         );
       if (Object.values(total)[0] > 0 && data.length > 0) {
         await Promise.all(

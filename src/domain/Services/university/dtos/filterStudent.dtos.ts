@@ -16,4 +16,12 @@ export class FilterStudentDto {
   @IsOptional()
   @IsString()
   status?: string | null;
+
+  @IsOptional()
+  @IsString()
+  academicYear?: string | null;
+
+  @IsOptional()
+  @IsString()
+  nameTeacher?: string | null;
 }

@@ -40,7 +40,7 @@ export class UniversityService {
       const inserted: TeachersFilter[] = await this.sequelize.query(
         'SP_AddNewTeachers @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @position=:position,' +
           '@department=:department, @phoneNumber=:phoneNumber,@slug=:slug,@studentAmount=:studentAmount,' +
-          '@maximumStudentAmount=:maximumStudentAmount,@email=:email',
+          '@maximumStudentAmount=:maximumStudentAmount,@email=:email,@academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -54,6 +54,7 @@ export class UniversityService {
             studentAmount: addNewTeachersByImportDto.studentAmount,
             maximumStudentAmount:
               addNewTeachersByImportDto.maximumStudentAmount,
+            academicYear: addNewTeachersByImportDto.academicYear,
             slug,
           },
           raw: true,
@@ -234,7 +235,7 @@ export class UniversityService {
       const updated = await this.sequelize.query(
         'SP_UpdateTeacher @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@studentAmount=:studentAmount,@slug=:slug,' +
-          '@maximumStudentAmount=:maximumStudentAmount',
+          '@maximumStudentAmount=:maximumStudentAmount,@academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -249,6 +250,7 @@ export class UniversityService {
             studentAmount: updateTeacherDto.studentAmount ?? null,
             slug: updateTeacherDto.slug ?? null,
             maximumStudentAmount: updateTeacherDto.maximumStudentAmount ?? null,
+            academicYear: updateTeacherDto.academicYear ?? null,
           },
           raw: true,
           mapToModel: true,
@@ -268,16 +270,18 @@ export class UniversityService {
   public async getAllStudentForClient(
     limit?: number,
     offset?: number,
+    academicYear?: string,
   ): Promise<StudentsFilter[]> {
     try {
       if (limit < 1 || offset < 0) return [];
       const total: StudentsFilter[] = await this.sequelize.query(
-        'SP_GetAllStudentsForClient @limit=:limit,@offset=:offset',
+        'SP_GetAllStudentsForClient @limit=:limit,@offset=:offset,@academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
             limit,
             offset,
+            academicYear,
           },
         },
       );
@@ -293,11 +297,12 @@ export class UniversityService {
     offset?: number,
     term?: string,
     fullName?: string,
+    academicYear?: string,
   ): Promise<StudentsFilter[]> {
     try {
       if (limit < 1 || offset < 0) return [];
       const total: StudentsFilter[] = await this.sequelize.query(
-        'SP_GetAllStudentsByTerm @limit=:limit,@offset=:offset,@term=:term,@fullName=:fullName',
+        'SP_GetAllStudentsByTerm @limit=:limit,@offset=:offset,@term=:term,@fullName=:fullName,@academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -305,6 +310,7 @@ export class UniversityService {
             offset,
             term,
             fullName,
+            academicYear,
           },
         },
       );
@@ -315,12 +321,20 @@ export class UniversityService {
     }
   }
 
-  public async getAllStudents(): Promise<SaveStudentAccountForOwnerResponse> {
+  public async getAllStudents(
+    academicYear?: string,
+  ): Promise<SaveStudentAccountForOwnerResponse> {
     try {
-      const students = await this.sequelize.query('SP_GetAllStudents', {
-        type: QueryTypes.SELECT,
-        raw: true,
-      });
+      const students = await this.sequelize.query(
+        'SP_GetAllStudents @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+          raw: true,
+        },
+      );
       return { students };
     } catch (error) {
       this.logger.error(error.message);
@@ -328,12 +342,20 @@ export class UniversityService {
     }
   }
 
-  public async getAllTeachers(): Promise<SaveTeacherAccountForOwnerResponse> {
+  public async getAllTeachers(
+    academicYear?: string,
+  ): Promise<SaveTeacherAccountForOwnerResponse> {
     try {
-      const teachers = await this.sequelize.query('SP_GetAllTeachers', {
-        type: QueryTypes.SELECT,
-        raw: true,
-      });
+      const teachers = await this.sequelize.query(
+        'SP_GetAllTeachers @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+          raw: true,
+        },
+      );
       return { teachers };
     } catch (error) {
       this.logger.error(error.message);
@@ -383,49 +405,14 @@ export class UniversityService {
     }
   }
 
-  public async getAllStudentsForClientNotPagination() {
+  public async getAllStudentsForClientNotPagination(academicYear?: string) {
     try {
       const total = await this.sequelize.query(
-        'SP_GetAllStudentsNotPaginationForClient',
-        {
-          type: QueryTypes.SELECT,
-        },
-      );
-      return total;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new DatabaseError(error);
-    }
-  }
-
-  public async getAllTeacherForClientNotPagination() {
-    try {
-      const total = await this.sequelize.query(
-        'SP_GetAllTeachersNotPaginationForClient',
-        {
-          type: QueryTypes.SELECT,
-        },
-      );
-      return total;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new DatabaseError(error);
-    }
-  }
-
-  public async getAllTeacherForClient(
-    limit?: number,
-    offset?: number,
-  ): Promise<TeachersFilter[]> {
-    try {
-      if (limit < 1 || offset < 0) return [];
-      const total: TeachersFilter[] = await this.sequelize.query(
-        'SP_GetAllTeachersForClient @limit=:limit,@offset=:offset',
+        'SP_GetAllStudentsNotPaginationForClient @academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            limit,
-            offset,
+            academicYear,
           },
         },
       );
@@ -436,12 +423,58 @@ export class UniversityService {
     }
   }
 
-  public async getAllIdentityNumberForClient() {
+  public async getAllTeacherForClientNotPagination(academicYear?: string) {
     try {
-      const identityNumber = await this.sequelize.query(
-        'SP_GetAllIdentityNumber',
+      const total = await this.sequelize.query(
+        'SP_GetAllTeachersNotPaginationForClient @academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllTeacherForClient(
+    academicYear?: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<TeachersFilter[]> {
+    try {
+      if (limit < 1 || offset < 0) return [];
+      const total: TeachersFilter[] = await this.sequelize.query(
+        'SP_GetAllTeachersForClient @limit=:limit,@offset=:offset,@academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            limit,
+            offset,
+            academicYear,
+          },
+        },
+      );
+      return total;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllIdentityNumberForClient(academicYear?: string) {
+    try {
+      const identityNumber = await this.sequelize.query(
+        'SP_GetAllIdentityNumber @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
         },
       );
       return identityNumber;
@@ -451,11 +484,35 @@ export class UniversityService {
     }
   }
 
-  public async getAllTermForClient() {
+  public async getAllTeacherName(academicYear?: string) {
     try {
-      const Term = await this.sequelize.query('SP_GetAllTerm', {
-        type: QueryTypes.SELECT,
-      });
+      const fullName = await this.sequelize.query(
+        'SP_GetAllTeacherName @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return fullName;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllTermForClient(academicYear?: string) {
+    try {
+      const Term = await this.sequelize.query(
+        'SP_GetAllTerm @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
       return Term;
     } catch (error) {
       this.logger.error(error.message);
@@ -463,11 +520,17 @@ export class UniversityService {
     }
   }
 
-  public async getAllClassForClient() {
+  public async getAllClassForClient(academicYear?: string) {
     try {
-      const result = await this.sequelize.query('SP_GetAllClass', {
-        type: QueryTypes.SELECT,
-      });
+      const result = await this.sequelize.query(
+        'SP_GetAllClass @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
       return result;
     } catch (error) {
       this.logger.error(error.message);
@@ -475,33 +538,14 @@ export class UniversityService {
     }
   }
 
-  async getTotalStudentsInUniversityForClient() {
-    try {
-      const total = await this.sequelize.query('SP_GetTotalStudentsForClient', {
-        type: QueryTypes.SELECT,
-        raw: true,
-        mapToModel: true,
-        model: Student,
-      });
-      return total[0];
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new DatabaseError(error);
-    }
-  }
-
-  async getTotalStudentsInUniversityForClientByCondition(
-    term?: string,
-    fullName?: string,
-  ) {
+  async getTotalStudentsInUniversityForClient(academicYear?: string) {
     try {
       const total = await this.sequelize.query(
-        'SP_GetTotalStudentsByTerm @term=:term,@fullName=:fullName',
+        'SP_GetTotalStudentsForClient @academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            term,
-            fullName,
+            academicYear,
           },
           raw: true,
           mapToModel: true,
@@ -515,14 +559,47 @@ export class UniversityService {
     }
   }
 
-  async getTotalTeachersInUniversityForClient() {
+  async getTotalStudentsInUniversityForClientByCondition(
+    term?: string,
+    fullName?: string,
+    academicYear?: string,
+  ) {
     try {
-      const total = await this.sequelize.query('SP_GetTotalTeachersForClient', {
-        type: QueryTypes.SELECT,
-        raw: true,
-        mapToModel: true,
-        model: Student,
-      });
+      const total = await this.sequelize.query(
+        'SP_GetTotalStudentsByTerm @term=:term,@fullName=:fullName,@academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            term,
+            fullName,
+            academicYear,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Student,
+        },
+      );
+      return total[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getTotalTeachersInUniversityForClient(academicYear?: string) {
+    try {
+      const total = await this.sequelize.query(
+        'SP_GetTotalTeachersForClient @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Student,
+        },
+      );
       return total[0];
     } catch (error) {
       this.logger.error(error.message);
@@ -570,7 +647,8 @@ export class UniversityService {
     try {
       const total: StudentsFilter[] = await this.sequelize.query(
         'SP_GetStudentByConditions @identityNumber=:identityNumber,@fullName=:fullName, @limit=:limit,' +
-          '@offset=:offset,@status=:status,@term=:term',
+          '@offset=:offset,@status=:status,@term=:term,' +
+          '@academicYear=:academicYear,@nameTeacher=:nameTeacher',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -580,6 +658,8 @@ export class UniversityService {
             identityNumber: filterStudentDto.identityNumber ?? null,
             term: filterStudentDto.term ?? null,
             status: filterStudentDto.status ?? null,
+            academicYear: filterStudentDto.academicYear ?? null,
+            nameTeacher: filterStudentDto.nameTeacher ?? null,
           },
           raw: true,
         },
@@ -622,7 +702,8 @@ export class UniversityService {
   async getTotalFilterStudentByConditions(filterStudentDto?: FilterStudentDto) {
     try {
       const total = await this.sequelize.query(
-        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status,@term=:term',
+        'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status,@term=:term,' +
+          '@academicYear=:academicYear,@nameTeacher=:nameTeacher',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -630,6 +711,8 @@ export class UniversityService {
             status: filterStudentDto?.status,
             identityNumber: filterStudentDto?.identityNumber,
             term: filterStudentDto?.term,
+            academicYear: filterStudentDto?.academicYear,
+            nameTeacher: filterStudentDto?.nameTeacher,
           },
           raw: true,
         },

@@ -1,44 +1,48 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AddNewTeachersByImportDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   firstName?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   lastName?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   fullName?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   email?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   position?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   department?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   slug?: string | null;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   studentAmount?: number | null;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   maximumStudentAmount?: number | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  academicYear?: string | null;
+
+  @IsString()
+  @IsOptional()
   phoneNumber?: string | null;
 }
 
