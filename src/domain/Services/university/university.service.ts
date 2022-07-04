@@ -484,6 +484,36 @@ export class UniversityService {
     }
   }
 
+  public async getAllAcademicYearInStudent() {
+    try {
+      const academicYearStudent = await this.sequelize.query(
+        'SP_GetAllAcademicYearInStudent',
+        {
+          type: QueryTypes.SELECT,
+        },
+      );
+      return academicYearStudent;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllAcademicYearInTeacher() {
+    try {
+      const academicYearTeacher = await this.sequelize.query(
+        'SP_GetAllAcademicYearInTeacher',
+        {
+          type: QueryTypes.SELECT,
+        },
+      );
+      return academicYearTeacher;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getAllTeacherName(academicYear?: string) {
     try {
       const fullName = await this.sequelize.query(

@@ -134,7 +134,16 @@ message StudentFilter {
     string internshipGrade = 18;
     repeated CV cv = 19;
     repeated Teacher teacher = 20;
+    repeated Detail detail = 21;
 }
+
+message Detail {
+    optional string studentId=1;
+    optional string teacherId=2;
+    optional string isRegistered=3;
+    optional string isAccepted=4;
+}
+
 message Teacher {
     string teacherId=1;
     string lastName=2;

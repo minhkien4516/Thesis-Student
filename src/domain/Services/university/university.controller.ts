@@ -96,18 +96,8 @@ export class UniversityController {
                 HttpStatus.BAD_REQUEST,
               );
             } else {
-              const teacher = await this.universityService.getTeacherById(
-                item.teacherId,
-              );
-              await this.universityService.UpdateStudentInformation(
-                item.studentId,
-                {
-                  nameTeacher:
-                    Object.values(teacher)[0][0].fullName.toString() || '',
-                },
-              );
+              return { register, message: 'Successfully registered' };
             }
-            return { register, message: 'Successfully registered' };
           } else if (Object.values(temp)[0][0].maximumStudentAmount > 0) {
             if (
               Object.values(temp)[0][0].studentAmount <
@@ -158,7 +148,17 @@ export class UniversityController {
     try {
       const accepted = await Promise.all(
         dto.teacher.map(async (item) => {
+          const teacher = await this.universityService.getTeacherById(
+            item.teacherId,
+          );
           const temp = this.universityService.acceptedStudentRegistration(item);
+          await this.universityService.UpdateStudentInformation(
+            item.studentId,
+            {
+              nameTeacher:
+                Object.values(teacher)[0][0].fullName.toString() || '',
+            },
+          );
           return {
             temp,
             message: 'Successfully accepted',
@@ -176,15 +176,42 @@ export class UniversityController {
   }
 
   @Patch('/student/rejected-registration')
-  async rejectedStudentRegistration(@Body() dto: RegisterTeacherForStudentDto) {
+  async rejectedStudentRegistration(
+    @Body() dto: RegisterTeacherForStudentsDto,
+  ) {
     try {
-      const accepted = await this.universityService.rejectedStudentRegistration(
-        dto,
+      const rejected = await Promise.all(
+        dto.teacher.map(async (item) => {
+          const teacher = await this.universityService.getTeacherById(
+            item.teacherId,
+          );
+          await this.universityService.rejectedStudentRegistration(item);
+          await this.universityService.UpdateStudentInformation(
+            item.studentId,
+            {
+              nameTeacher: '',
+            },
+          );
+          if (Object.values(teacher)[0][0].studentAmount > 0) {
+            await this.universityService.UpdateTeacherInformation(
+              item.teacherId,
+              {
+                studentAmount: Object.values(teacher)[0][0].studentAmount - 1,
+              },
+            );
+            return {
+              status: HttpStatus.OK,
+              message: 'Successfully rejected',
+            };
+          } else {
+            throw new HttpException(
+              'This teacher has no students',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }),
       );
-      return {
-        accepted,
-        message: 'Successfully rejected',
-      };
+      return rejected;
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -821,6 +848,26 @@ export class UniversityController {
     }
   }
 
+  @Get('academicYear')
+  public async getAllAcademicYear() {
+    try {
+      const resultStudent =
+        await this.universityService.getAllAcademicYearInStudent();
+      const resultTeacher =
+        await this.universityService.getAllAcademicYearInTeacher();
+      return {
+        student: resultStudent,
+        teacher: resultTeacher,
+      };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('teacher/fullName')
   public async getAllTeacherName(@Query('academicYear') academicYear: string) {
     try {
@@ -1055,9 +1102,31 @@ export class UniversityController {
           ...filterStudentDto,
         });
 
-      if (Object.values(total)[0] < 0 && data.length < 0)
+      if (Object.values(total)[0] < 0 && data.length < 0) {
         return { data: [], pagination: { total: 0 } };
-      return { data, pagination: total };
+      } else {
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant =
+              await this.universityService.getAllDataForStudentByStudentId(
+                item.id,
+              );
+            console.log(typeof Object.keys(relevant)[0]);
+            if (typeof Object.keys(relevant)[0] == 'undefined') {
+              return (item.details = []);
+            } else if (typeof Object.keys(relevant)[0] == 'string') {
+              item.details = [relevant];
+              const { files } = await this.getImages(item.details[0].cv[0].id);
+              item.details[0].cv[0].images = files;
+              return {
+                details: item.details,
+                images: item.details[0].cv[0].images,
+              };
+            }
+          }),
+        );
+        return { data, pagination: total };
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -1086,9 +1155,25 @@ export class UniversityController {
           ...filterTeacherDto,
         });
 
-      if (Object.values(total)[0] < 0 && data.length < 0)
+      if (Object.values(total)[0] < 0 && data.length < 0) {
         return { data: [], pagination: { total: 0 } };
-      return { data, pagination: total };
+      } else {
+        await Promise.all(
+          data.map(async (item) => {
+            const relevant = await this.universityService.getTeacherById(
+              item.id,
+            );
+            if (Object.values(relevant)[0][1] == undefined) {
+              return (item.details = []);
+            } else {
+              const student: TeacherDetail = Object.values(relevant)[0][1];
+              item.details = [student];
+              return item.details;
+            }
+          }),
+        );
+        return { data, pagination: total };
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

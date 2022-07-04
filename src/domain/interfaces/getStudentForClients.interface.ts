@@ -124,6 +124,14 @@ export interface StudentFilter {
       slug?: string;
     },
   ];
+  detail?: [
+    {
+      studentId?: string;
+      teacherId?: string;
+      isRegistered?: boolean;
+      isAccepted?: boolean;
+    },
+  ];
 }
 export interface StudentsFilterResponse {
   data: StudentsFilter[];
