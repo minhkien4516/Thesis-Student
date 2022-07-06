@@ -550,6 +550,24 @@ export class UniversityService {
     }
   }
 
+  public async getStudentReportForUniversity(academicYear?: string) {
+    try {
+      const report = await this.sequelize.query(
+        'SP_StudentsReport @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return report[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getAllClassForClient(academicYear?: string) {
     try {
       const result = await this.sequelize.query(

@@ -900,6 +900,24 @@ export class UniversityController {
     }
   }
 
+  @Get('/studentReport')
+  public async getStudentReportForClient(
+    @Query('academicYear') academicYear: string,
+  ) {
+    try {
+      const report = await this.universityService.getStudentReportForUniversity(
+        academicYear,
+      );
+      return { report };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('student/class')
   public async getAllClass(@Query('academicYear') academicYear: string) {
     try {
