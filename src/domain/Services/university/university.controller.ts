@@ -62,6 +62,7 @@ import { Role } from '../../../common/enums/role.enum';
 import { SaveTeacherAccountForOwnerRequest } from '../../interfaces/saveTeacherAccountForOwnerRequest.interface';
 import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 import { getTeacherByIdForLoginRequest } from '../../interfaces/getTeacherByIdForLoginRequest ';
+import { ModifyInternship } from './dtos/modifyInternship.dtos';
 
 @Controller('university')
 export class UniversityController {
@@ -166,6 +167,46 @@ export class UniversityController {
         }),
       );
       return accepted;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Patch('student/internship-update')
+  async updateStudentInternship(
+    @Query('studentId') studentId: string,
+    @Body() dto: ModifyInternship,
+  ) {
+    try {
+      const certification =
+        await this.universityService.modifyInternshipCertification(
+          studentId,
+          dto.internshipCertification.toLowerCase(),
+        );
+      const report = await this.universityService.modifyInternshipCertification(
+        studentId,
+        dto.internshipReport.toLowerCase(),
+      );
+      const feedback =
+        await this.universityService.modifyInternshipCertification(
+          studentId,
+          dto.internshipFeedback.toLowerCase(),
+        );
+      const survey = await this.universityService.modifyInternshipCertification(
+        studentId,
+        dto.internshipSurvey.toLowerCase(),
+      );
+      return {
+        certification,
+        report,
+        feedback,
+        survey,
+        message: 'Successfully updated',
+      };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -302,10 +343,9 @@ export class UniversityController {
           dto.phoneNumber = student['Số điện thoại'];
           dto.status = student['Trạng thái'];
           dto.nameTeacher = student['GVHD'];
-          dto.internshipCertification =
-            student['Phiếu tiếp nhận sinh viên thực tập'];
-          dto.internshipReport = student['Phiếu báo cáo thực tập'];
-          dto.internshipGrade = student['Điểm'];
+          dto.internshipFirstGrade = student['Điểm 1'].toFixed(2);
+          dto.internshipSecondGrade = student['Điểm 2'].toFixed(2);
+          dto.internshipThirdGrade = student['Điểm 3'].toFixed(2);
           const relevant = await this.universityService.addNewStudent({
             ...dto,
           });
@@ -452,92 +492,92 @@ export class UniversityController {
     }
   }
 
-  @Patch('student/import-internshipCertification')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
-  public async importInternshipCertification(
-    @Query('id') id: string,
-    @UploadedFiles() Files: { files?: Express.Multer.File[] },
-  ) {
-    try {
-      const student = await this.universityService.getStudentByIdForClient(id);
-      if (Object.entries(student)[0] == undefined || !Files) {
-        throw new HttpException(
-          'This student does not exist in our system or you do not attach essential file...',
-          HttpStatus.BAD_REQUEST,
-        );
-      } else {
-        await this.uploadImages(Object.entries(student)[0][1], Files.files);
-        const { files } = await this.getImages(Object.entries(student)[0][1]);
-        if (Object.values(files)[0].url != null) {
-          if (Object.entries(student)[16][1] == '') {
-            const studentUpdate =
-              await this.universityService.UpdateStudentInformation(id, {
-                internshipCertification: Object.values(files)[0].url,
-                status: Status.INTERNSHIP.toString(),
-              });
-            return studentUpdate;
-          } else if (Object.entries(student)[16][1] != '') {
-            const studentUpdate =
-              await this.universityService.UpdateStudentInformation(id, {
-                internshipCertification: Object.values(files)[0].url,
-              });
-            return studentUpdate;
-          }
-        } else {
-          return {};
-        }
-      }
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new HttpException(
-        error.message,
-        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
-      );
-    }
-  }
+  // @Patch('student/import-internshipCertification')
+  // @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  // public async importInternshipCertification(
+  //   @Query('id') id: string,
+  //   @UploadedFiles() Files: { files?: Express.Multer.File[] },
+  // ) {
+  //   try {
+  //     const student = await this.universityService.getStudentByIdForClient(id);
+  //     if (Object.entries(student)[0] == undefined || !Files) {
+  //       throw new HttpException(
+  //         'This student does not exist in our system or you do not attach essential file...',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     } else {
+  //       await this.uploadImages(Object.entries(student)[0][1], Files.files);
+  //       const { files } = await this.getImages(Object.entries(student)[0][1]);
+  //       if (Object.values(files)[0].url != null) {
+  //         if (Object.entries(student)[16][1] == '') {
+  //           const studentUpdate =
+  //             await this.universityService.UpdateStudentInformation(id, {
+  //               internshipCertification: Object.values(files)[0].url,
+  //               status: Status.INTERNSHIP.toString(),
+  //             });
+  //           return studentUpdate;
+  //         } else if (Object.entries(student)[16][1] != '') {
+  //           const studentUpdate =
+  //             await this.universityService.UpdateStudentInformation(id, {
+  //               internshipCertification: Object.values(files)[0].url,
+  //             });
+  //           return studentUpdate;
+  //         }
+  //       } else {
+  //         return {};
+  //       }
+  //     }
+  //   } catch (error) {
+  //     this.logger.error(error.message);
+  //     throw new HttpException(
+  //       error.message,
+  //       error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+  //     );
+  //   }
+  // }
 
-  @Patch('student/import-internshipReport')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
-  public async importInternshipReport(
-    @Query('id') id: string,
-    @UploadedFiles() Files: { files?: Express.Multer.File[] },
-  ) {
-    try {
-      const student = await this.universityService.getStudentByIdForClient(id);
-      if (Object.entries(student)[0] == undefined || !Files) {
-        throw new HttpException(
-          'This student does not exist in our system or you do not attach essential file...',
-          HttpStatus.BAD_REQUEST,
-        );
-      } else {
-        if (Object.entries(student)[15][1] == '') {
-          throw new HttpException(
-            'This student does not have internship certification, please upload its first...',
-            HttpStatus.BAD_REQUEST,
-          );
-        } else if (Object.entries(student)[15][1] != '') {
-          await this.uploadImages(Object.entries(student)[0][1], Files.files);
-          const { files } = await this.getImages(Object.entries(student)[0][1]);
-          if (Object.values(files)[0].url != null) {
-            const studentUpdate =
-              await this.universityService.UpdateStudentInformation(id, {
-                internshipReport: Object.values(files)[0].url,
-                status: Status.COMPLETED,
-              });
-            return studentUpdate;
-          } else {
-            return {};
-          }
-        }
-      }
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new HttpException(
-        error.message,
-        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
-      );
-    }
-  }
+  // @Patch('student/import-internshipReport')
+  // @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  // public async importInternshipReport(
+  //   @Query('id') id: string,
+  //   @UploadedFiles() Files: { files?: Express.Multer.File[] },
+  // ) {
+  //   try {
+  //     const student = await this.universityService.getStudentByIdForClient(id);
+  //     if (Object.entries(student)[0] == undefined || !Files) {
+  //       throw new HttpException(
+  //         'This student does not exist in our system or you do not attach essential file...',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     } else {
+  //       if (Object.entries(student)[15][1] == '') {
+  //         throw new HttpException(
+  //           'This student does not have internship certification, please upload its first...',
+  //           HttpStatus.BAD_REQUEST,
+  //         );
+  //       } else if (Object.entries(student)[15][1] != '') {
+  //         await this.uploadImages(Object.entries(student)[0][1], Files.files);
+  //         const { files } = await this.getImages(Object.entries(student)[0][1]);
+  //         if (Object.values(files)[0].url != null) {
+  //           const studentUpdate =
+  //             await this.universityService.UpdateStudentInformation(id, {
+  //               internshipReport: Object.values(files)[0].url,
+  //               status: Status.COMPLETED,
+  //             });
+  //           return studentUpdate;
+  //         } else {
+  //           return {};
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     this.logger.error(error.message);
+  //     throw new HttpException(
+  //       error.message,
+  //       error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+  //     );
+  //   }
+  // }
 
   @Post('teacher/import')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
@@ -662,6 +702,84 @@ export class UniversityController {
     }
   }
 
+  // @Patch('student')
+  // public async updateStudentInformation(
+  //   @Query('id') id: string,
+  //   @Body() dto: UpdateStudentDto,
+  // ) {
+  //   try {
+  //     const student = await this.universityService.getStudentByIdForClient(id);
+  //     if (Object.entries(student)[0] == undefined) {
+  //       throw new HttpException(
+  //         'This student does not exist in our system...',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     } else if (
+  //       Object.entries(student)[16][1] == '' &&
+  //       dto.internshipCertification == ''
+  //     ) {
+  //       dto.status = Status.NONINTERNSHIP.toString();
+  //       dto.fullName =
+  //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+  //       const result = await this.universityService.UpdateStudentInformation(
+  //         id,
+  //         dto,
+  //       );
+  //       return result;
+  //     } else if (
+  //       Object.entries(student)[15][1] == '' &&
+  //       dto.internshipReport == ''
+  //     ) {
+  //       dto.status = Status.NONINTERNSHIP.toString();
+  //       dto.fullName =
+  //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+  //       const result = await this.universityService.UpdateStudentInformation(
+  //         id,
+  //         dto,
+  //       );
+  //       return result;
+  //     } else if (
+  //       Object.entries(student)[16][1] != '' &&
+  //       dto.internshipCertification == ''
+  //     ) {
+  //       dto.status = Status.INTERNSHIP.toString();
+  //       dto.fullName =
+  //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+  //       const result = await this.universityService.UpdateStudentInformation(
+  //         id,
+  //         { ...dto },
+  //       );
+  //       return result;
+  //     } else if (
+  //       Object.entries(student)[15][1] != '' &&
+  //       dto.internshipReport == ''
+  //     ) {
+  //       dto.status = Status.INTERNSHIP.toString();
+  //       dto.fullName =
+  //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+  //       const result = await this.universityService.UpdateStudentInformation(
+  //         id,
+  //         { ...dto },
+  //       );
+  //       return result;
+  //     } else {
+  //       dto.fullName =
+  //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+  //       const result = await this.universityService.UpdateStudentInformation(
+  //         id,
+  //         dto,
+  //       );
+  //       return result;
+  //     }
+  //   } catch (error) {
+  //     this.logger.error(error.message);
+  //     throw new HttpException(
+  //       error.message,
+  //       error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+  //     );
+  //   }
+  // }
+
   @Patch('student')
   public async updateStudentInformation(
     @Query('id') id: string,
@@ -674,62 +792,40 @@ export class UniversityController {
           'This student does not exist in our system...',
           HttpStatus.BAD_REQUEST,
         );
-      } else if (
-        Object.entries(student)[16][1] == '' &&
-        dto.internshipCertification == ''
-      ) {
-        dto.status = Status.NONINTERNSHIP.toString();
-        dto.fullName =
-          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-        const result = await this.universityService.UpdateStudentInformation(
-          id,
-          dto,
-        );
-        return result;
-      } else if (
-        Object.entries(student)[15][1] == '' &&
-        dto.internshipReport == ''
-      ) {
-        dto.status = Status.NONINTERNSHIP.toString();
-        dto.fullName =
-          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-        const result = await this.universityService.UpdateStudentInformation(
-          id,
-          dto,
-        );
-        return result;
-      } else if (
-        Object.entries(student)[16][1] != '' &&
-        dto.internshipCertification == ''
-      ) {
-        dto.status = Status.INTERNSHIP.toString();
-        dto.fullName =
-          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-        const result = await this.universityService.UpdateStudentInformation(
-          id,
-          { ...dto },
-        );
-        return result;
-      } else if (
-        Object.entries(student)[15][1] != '' &&
-        dto.internshipReport == ''
-      ) {
-        dto.status = Status.INTERNSHIP.toString();
-        dto.fullName =
-          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-        const result = await this.universityService.UpdateStudentInformation(
-          id,
-          { ...dto },
-        );
-        return result;
       } else {
-        dto.fullName =
-          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-        const result = await this.universityService.UpdateStudentInformation(
-          id,
-          dto,
-        );
-        return result;
+        if (
+          dto.internshipFirstGrade < 0 &&
+          dto.internshipSecondGrade < 0 &&
+          dto.internshipThirdGrade < 0
+        ) {
+          dto.internshipFirstGrade =
+            dto.internshipSecondGrade =
+            dto.internshipThirdGrade =
+              0;
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            dto,
+          );
+          return result;
+        } else if (
+          dto.internshipFirstGrade > 10 &&
+          dto.internshipSecondGrade > 10 &&
+          dto.internshipThirdGrade > 10
+        ) {
+          dto.internshipFirstGrade =
+            dto.internshipSecondGrade =
+            dto.internshipThirdGrade =
+              10;
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+          const result = await this.universityService.UpdateStudentInformation(
+            id,
+            dto,
+          );
+          return result;
+        }
       }
     } catch (error) {
       this.logger.error(error.message);
@@ -753,6 +849,10 @@ export class UniversityController {
           HttpStatus.BAD_REQUEST,
         );
       }
+      if (Object.values(teacher)[0][1] != [])
+        console.log(Object.values(teacher)[0][1].id);
+      const studentId = Object.values(teacher)[0][1].id;
+
       if (Object.values(teacher)[0][0].maximumStudentAmount == 0) {
         if (dto.maximumStudentAmount > 0) {
           if (

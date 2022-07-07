@@ -35,7 +35,38 @@ message Student {
     string nameTeacher = 15;
     string internshipCertification = 16;
     string internshipReport = 17;
-    string internshipGrade = 18;
+    string internshipFeedback = 18;
+    string internshipSurvey = 19;
+    string internshipFirstGrade = 20;
+    string internshipSecondGrade = 21;
+    string internshipThirdGrade = 22;
+    string internshipFinalGrade = 23;
+}
+
+message StudentWaitingAccepted {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string fullName = 4;
+    string email = 5;
+    string birthDate = 6;
+    string identityNumber = 7;
+    string address = 8;
+    string phoneNumber = 9;
+    string class = 10;
+    string term = 11;
+    string status = 12;
+    string academicYear = 13;
+    string slug = 14;
+    string nameTeacher = 15;
+    string internshipCertification = 16;
+    string internshipReport = 17;
+    string internshipFeedback = 18;
+    string internshipSurvey = 19;
+    string internshipFirstGrade = 20;
+    string internshipSecondGrade = 21;
+    string internshipThirdGrade = 22;
+    string internshipFinalGrade = 23;
 }
 
 message Contact {
@@ -111,6 +142,7 @@ message getTeacherByIdForLoginRequest{
 message TeacherDetail {
     repeated Teacher teacher = 1;
     repeated Student student = 2;
+    repeated StudentWaitingAccepted studentWaitingAccepted = 3;
 }
 
 message StudentFilter {
@@ -131,10 +163,15 @@ message StudentFilter {
     string slug = 15;
     string internshipCertification = 16;
     string internshipReport = 17;
-    string internshipGrade = 18;
-    repeated CV cv = 19;
-    repeated Teacher teacher = 20;
-    repeated Detail detail = 21;
+    string internshipFeedback = 18;
+    string internshipSurvey = 19;
+    string internshipFirstGrade = 20;
+    string internshipSecondGrade = 21;
+    string internshipThirdGrade = 22;
+    string internshipFinalGrade = 23;
+    repeated CV cv = 24;
+    repeated Teacher teacher = 25;
+    repeated Detail detail = 26;
 }
 
 message Detail {

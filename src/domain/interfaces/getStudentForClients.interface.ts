@@ -15,7 +15,12 @@ export interface StudentsFilter {
   nameTeacher?: string;
   internshipCertification?: string;
   internshipReport?: string;
-  internshipGrade?: string;
+  internshipFeedback?: string;
+  internshipSurvey?: string;
+  internshipFirstGrade?: number;
+  internshipSecondGrade?: number;
+  internshipThirdGrade?: number;
+  internshipFinalGrade?: number;
   details?: StudentDetail[];
 }
 
@@ -37,7 +42,12 @@ export interface StudentFilter {
   nameTeacher?: string;
   internshipCertification?: string;
   internshipReport?: string;
-  internshipGrade?: string;
+  internshipFeedback?: string;
+  internshipSurvey?: string;
+  internshipFirstGrade?: number;
+  internshipSecondGrade?: number;
+  internshipThirdGrade?: number;
+  internshipFinalGrade?: number;
   cv?: [
     {
       id?: string;

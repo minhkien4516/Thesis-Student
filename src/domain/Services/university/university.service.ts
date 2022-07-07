@@ -16,6 +16,7 @@ import { SaveStudentAccountForOwnerResponse } from '../../interfaces/saveStudent
 import { RegisterTeacherForStudentDto } from './dtos/registerTeacherForStudent.dtos';
 import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
 import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
+import { ModifyInternship } from './dtos/modifyInternship.dtos';
 
 @Injectable()
 export class UniversityService {
@@ -134,6 +135,98 @@ export class UniversityService {
     }
   }
 
+  public async modifyInternshipCertification(
+    studentId: string,
+    internshipCertification: string,
+  ) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_ModifyInternshipCertification @studentId=:studentId, @internshipCertification=:internshipCertification',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            studentId,
+            internshipCertification,
+          },
+          raw: true,
+        },
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async modifyInternshipReport(
+    studentId: string,
+    internshipReport: string,
+  ) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_ModifyInternshipReport @studentId=:studentId, @internshipReport=:internshipReport',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            studentId,
+            internshipReport,
+          },
+          raw: true,
+        },
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async modifyInternshipFeedback(
+    studentId: string,
+    internshipFeedback: string,
+  ) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_ModifyInternshipFeedback @studentId=:studentId, @internshipFeedback=:internshipFeedback',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            studentId,
+            internshipFeedback,
+          },
+          raw: true,
+        },
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async modifyInternshipSurvey(
+    studentId: string,
+    internshipSurvey: string,
+  ) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_ModifyInternshipSurvey @studentId=:studentId, @internshipSurvey=:internshipSurvey',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            studentId,
+            internshipSurvey,
+          },
+          raw: true,
+        },
+      );
+      return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async addNewStudent(
     addNewStudentsDto: AddNewStudentsByImportDto,
   ): Promise<StudentsFilter[]> {
@@ -147,7 +240,7 @@ export class UniversityService {
         'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
-          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport,@internshipGrade=:internshipGrade',
+          '@internshipFirstGrade=:internshipFirstGrade,@internshipSecondGrade=:internshipSecondGrade,@internshipThirdGrade=:internshipThirdGrade',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -164,9 +257,9 @@ export class UniversityService {
             status: addNewStudentsDto.status,
             academicYear: addNewStudentsDto.academicYear,
             nameTeacher: addNewStudentsDto.nameTeacher,
-            internshipCertification: addNewStudentsDto.internshipCertification,
-            internshipReport: addNewStudentsDto.internshipReport,
-            internshipGrade: addNewStudentsDto.internshipGrade,
+            internshipFirstGrade: addNewStudentsDto.internshipFirstGrade,
+            internshipSecondGrade: addNewStudentsDto.internshipSecondGrade,
+            internshipThirdGrade: addNewStudentsDto.internshipThirdGrade,
             slug,
           },
           raw: true,
@@ -188,7 +281,7 @@ export class UniversityService {
         'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
           '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
-          '@internshipCertification=:internshipCertification,@internshipReport=:internshipReport,@internshipGrade=:internshipGrade',
+          '@internshipFirstGrade=:internshipFirstGrade,@internshipSecondGrade=:internshipSecondGrade,@internshipThirdGrade=:internshipThirdGrade',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -207,10 +300,10 @@ export class UniversityService {
             academicYear: updateStudentDto.academicYear ?? null,
             nameTeacher: updateStudentDto.nameTeacher ?? null,
             slug: updateStudentDto.slug ?? null,
-            internshipCertification:
-              updateStudentDto.internshipCertification ?? null,
-            internshipReport: updateStudentDto.internshipReport ?? null,
-            internshipGrade: updateStudentDto.internshipGrade ?? null,
+            internshipFirstGrade: updateStudentDto.internshipFirstGrade ?? null,
+            internshipSecondGrade:
+              updateStudentDto.internshipSecondGrade ?? null,
+            internshipThirdGrade: updateStudentDto.internshipThirdGrade ?? null,
           },
           raw: true,
           mapToModel: true,

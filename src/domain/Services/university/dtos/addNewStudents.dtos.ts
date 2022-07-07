@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AddNewStudentsByImportDto {
   @IsString()
@@ -58,16 +58,16 @@ export class AddNewStudentsByImportDto {
   nameTeacher?: string | null;
 
   @IsOptional()
-  @IsString()
-  internshipCertification?: string | null;
+  @IsNumber()
+  internshipFirstGrade?: number | null;
 
   @IsOptional()
-  @IsString()
-  internshipReport?: string | null;
+  @IsNumber()
+  internshipSecondGrade?: number | null;
 
   @IsOptional()
-  @IsString()
-  internshipGrade?: number | null;
+  @IsNumber()
+  internshipThirdGrade?: number | null;
 }
 
 export class AddNewStudentsDto {
