@@ -152,7 +152,8 @@ export class UniversityController {
           const teacher = await this.universityService.getTeacherById(
             item.teacherId,
           );
-          const temp = this.universityService.acceptedStudentRegistration(item);
+          const result =
+            await this.universityService.acceptedStudentRegistration(item);
           await this.universityService.UpdateStudentInformation(
             item.studentId,
             {
@@ -161,12 +162,15 @@ export class UniversityController {
             },
           );
           return {
-            temp,
+            result,
+            teacher: Object.values(teacher)[0],
+            student: Object.values(teacher)[1] || [],
+            studentWaitingAccepted: Object.values(teacher)[2] || [],
             message: 'Successfully accepted',
           };
         }),
       );
-      return accepted;
+      return accepted[0];
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -838,71 +842,32 @@ export class UniversityController {
     @Body() dto: UpdateTeacherDto,
   ) {
     try {
-      const teacher = await this.universityService.getTeacherById(id);
+      const teacher: TeacherDetail =
+        await this.universityService.getTeacherById(id);
+
       if (Object.values(teacher)[0][0] == undefined) {
         throw new HttpException(
           'This teacher does not exist in our system...',
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (Object.values(teacher)[0][1] != [])
-        console.log(Object.values(teacher)[0][1]);
-      // const studentId = Object.values(teacher)[0][1].id;
-
-      if (Object.values(teacher)[0][0].maximumStudentAmount == 0) {
-        if (dto.maximumStudentAmount > 0) {
-          if (
-            dto.maximumStudentAmount >
-            Object.values(teacher)[0][0].studentAmount
-          ) {
-            dto.fullName =
-              dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-            const result =
-              await this.universityService.UpdateTeacherInformation(id, dto);
-            return result;
-          } else if (
-            dto.maximumStudentAmount <
-            Object.values(teacher)[0][0].studentAmount
-          ) {
-            throw new HttpException(
-              'The maximum student amount cannot be less than the current student amount...',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-        } else if (dto.maximumStudentAmount <= 0) {
-          throw new HttpException(
-            'Maximum student amount must be greater than 0...',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-      } else if (Object.values(teacher)[0][0].maximumStudentAmount > 0) {
-        if (dto.maximumStudentAmount > 0) {
-          if (
-            dto.maximumStudentAmount >
-            Object.values(teacher)[0][0].studentAmount
-          ) {
-            dto.fullName =
-              dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-            const result =
-              await this.universityService.UpdateTeacherInformation(id, dto);
-            return result;
-          } else if (
-            dto.maximumStudentAmount <
-            Object.values(teacher)[0][0].studentAmount
-          ) {
-            throw new HttpException(
-              'The maximum student amount cannot be less than the current student amount...',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-        } else if (dto.maximumStudentAmount < 0) {
-          throw new HttpException(
-            'Maximum student amount must be greater than 0...',
-            HttpStatus.BAD_REQUEST,
-          );
-        } else if ((dto.maximumStudentAmount = 0)) {
+      if (dto.firstName != '' || dto.lastName != '' || dto.fullName != '') {
+        if (teacher.student != undefined) {
           dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+            dto.lastName?.toString().concat(' ', dto.firstName?.toString()) ||
+            '';
+          const result = await this.universityService.UpdateTeacherInformation(
+            id,
+            dto,
+          );
+          const studentId = teacher.student[0].studentId;
+          await this.universityService.UpdateStudentInformation(studentId, {
+            nameTeacher: dto.fullName,
+          });
+          return result;
+        } else {
+          dto.fullName =
+            dto.lastName?.concat(' ', dto.firstName?.toString()) || '';
           const result = await this.universityService.UpdateTeacherInformation(
             id,
             dto,
@@ -910,13 +875,67 @@ export class UniversityController {
           return result;
         }
       }
-      dto.fullName =
-        dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-      const result = await this.universityService.UpdateTeacherInformation(
-        id,
-        dto,
-      );
-      return result;
+      // if (Object.values(teacher)[0][0].maximumStudentAmount == 0) {
+      //   if (dto.maximumStudentAmount > 0) {
+      //     if (
+      //       dto.maximumStudentAmount >
+      //       Object.values(teacher)[0][0].studentAmount
+      //     ) {
+      //       dto.fullName =
+      //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+      //       const result =
+      //         await this.universityService.UpdateTeacherInformation(id, dto);
+      //       return result;
+      //     } else if (
+      //       dto.maximumStudentAmount <
+      //       Object.values(teacher)[0][0].studentAmount
+      //         'The maximum student amount cannot be less than the current student amount...',
+      //     ) {
+      //       throw new HttpException(
+      //         HttpStatus.BAD_REQUEST,
+      //       );
+      //     }
+      //   } else if (dto.maximumStudentAmount <= 0) {
+      //     throw new HttpException(
+      //       'Maximum student amount must be greater than 0...',
+      //       HttpStatus.BAD_REQUEST,
+      //     );
+      //   }
+      // } else if (Object.values(teacher)[0][0].maximumStudentAmount > 0) {
+      //   if (dto.maximumStudentAmount > 0) {
+      //     if (
+      //       dto.maximumStudentAmount >
+      //       Object.values(teacher)[0][0].studentAmount
+      //     ) {
+      //       dto.fullName =
+      //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+      //       const result =
+      //         await this.universityService.UpdateTeacherInformation(id, dto);
+      //       return result;
+      //     } else if (
+      //       dto.maximumStudentAmount <
+      //       Object.values(teacher)[0][0].studentAmount
+      //     ) {
+      //       throw new HttpException(
+      //         'The maximum student amount cannot be less than the current student amount...',
+      //         HttpStatus.BAD_REQUEST,
+      //       );
+      //     }
+      //   } else if (dto.maximumStudentAmount < 0) {
+      //     throw new HttpException(
+      //       'Maximum student amount must be greater than 0...',
+      //       HttpStatus.BAD_REQUEST,
+      //     );
+      //   } else if ((dto.maximumStudentAmount = 0)) {
+      //     dto.fullName =
+      //       dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+      //     const result = await this.universityService.UpdateTeacherInformation(
+      //       id,
+      //       dto,
+      //     );
+      //     return result;
+      //   }
+      // }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

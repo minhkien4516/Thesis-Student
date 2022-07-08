@@ -111,7 +111,7 @@ export class UniversityService {
           raw: true,
         },
       );
-      return accepted[0];
+      return accepted;
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);
@@ -330,7 +330,7 @@ export class UniversityService {
           '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@studentAmount=:studentAmount,@slug=:slug,' +
           '@maximumStudentAmount=:maximumStudentAmount,@academicYear=:academicYear',
         {
-          type: QueryTypes.SELECT,
+          type: QueryTypes.RAW,
           replacements: {
             id,
             firstName: updateTeacherDto.firstName?.trim() ?? null,
@@ -347,13 +347,22 @@ export class UniversityService {
           },
           raw: true,
           mapToModel: true,
-          model: Student,
         },
       );
-      updated[0].slug = slugify(
-        updated[0].lastName + '-' + updated[0].firstName,
-      );
-      return updated[0];
+      if (
+        typeof Object.keys(updated) == null ||
+        typeof Object.keys(updated) == 'undefined' ||
+        !updated.length
+      )
+        return updated[0];
+      {
+        const info: string = updated[0]
+          .map((each: string) => {
+            return Object.values(each)[0];
+          })
+          .reduce((acc: string, curr: string) => acc + curr, '');
+        return JSON.parse(info);
+      }
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

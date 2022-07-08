@@ -18,7 +18,7 @@ message File {
     string url = 3;
 }
 message Student {
-    string id = 1;
+    string studentId = 1;
     string firstName = 2;
     string lastName = 3;
     string fullName = 4;
@@ -33,18 +33,18 @@ message Student {
     string academicYear = 13;
     string slug = 14;
     string nameTeacher = 15;
-    string internshipCertification = 16;
-    string internshipReport = 17;
-    string internshipFeedback = 18;
-    string internshipSurvey = 19;
-    string internshipFirstGrade = 20;
-    string internshipSecondGrade = 21;
-    string internshipThirdGrade = 22;
-    string internshipFinalGrade = 23;
+    bool internshipCertification = 16;
+    bool internshipReport = 17;
+    bool internshipFeedback = 18;
+    bool internshipSurvey = 19;
+    int32 internshipFirstGrade = 20;
+    int32 internshipSecondGrade = 21;
+    int32 internshipThirdGrade = 22;
+    int32 internshipFinalGrade = 23;
 }
 
 message StudentWaitingAccepted {
-    string id = 1;
+    string studentId = 1;
     string firstName = 2;
     string lastName = 3;
     string fullName = 4;
@@ -59,14 +59,14 @@ message StudentWaitingAccepted {
     string academicYear = 13;
     string slug = 14;
     string nameTeacher = 15;
-    string internshipCertification = 16;
-    string internshipReport = 17;
-    string internshipFeedback = 18;
-    string internshipSurvey = 19;
-    string internshipFirstGrade = 20;
-    string internshipSecondGrade = 21;
-    string internshipThirdGrade = 22;
-    string internshipFinalGrade = 23;
+    bool internshipCertification = 16;
+    bool internshipReport = 17;
+    bool internshipFeedback = 18;
+    bool internshipSurvey = 19;
+    int32 internshipFirstGrade = 20;
+    int32 internshipSecondGrade = 21;
+    int32 internshipThirdGrade = 22;
+    int32 internshipFinalGrade = 23;
 }
 
 message Contact {
