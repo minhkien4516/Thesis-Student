@@ -18,7 +18,7 @@ message File {
     string url = 3;
 }
 message Student {
-    string studentId = 1;
+    string id = 1;
     string firstName = 2;
     string lastName = 3;
     string fullName = 4;
@@ -44,7 +44,7 @@ message Student {
 }
 
 message StudentWaitingAccepted {
-    string studentId = 1;
+    string id = 1;
     string firstName = 2;
     string lastName = 3;
     string fullName = 4;

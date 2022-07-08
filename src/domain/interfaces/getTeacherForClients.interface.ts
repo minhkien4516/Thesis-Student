@@ -41,7 +41,7 @@ export interface TeacherDetail {
   ];
   student?: [
     {
-      studentId?: string;
+      id?: string;
       firstName?: string;
       lastName?: string;
       email?: string;
@@ -71,7 +71,7 @@ export interface TeacherDetail {
   ];
   studentWaitingAccepted?: [
     {
-      studentId?: string;
+      id?: string;
       firstName?: string;
       lastName?: string;
       email?: string;

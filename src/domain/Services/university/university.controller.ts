@@ -860,7 +860,7 @@ export class UniversityController {
             id,
             dto,
           );
-          const studentId = teacher.student[0].studentId;
+          const studentId = teacher.student[0].id;
           await this.universityService.UpdateStudentInformation(studentId, {
             nameTeacher: dto.fullName,
           });
