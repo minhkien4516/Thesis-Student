@@ -187,24 +187,28 @@ export class UniversityController {
           studentId,
           dto.internshipCertification.toLowerCase(),
         );
-      const report = await this.universityService.modifyInternshipCertification(
+      const internshipCertification = Object.values(certification)[0];
+      const report = await this.universityService.modifyInternshipReport(
         studentId,
         dto.internshipReport.toLowerCase(),
       );
-      const feedback =
-        await this.universityService.modifyInternshipCertification(
-          studentId,
-          dto.internshipFeedback.toLowerCase(),
-        );
-      const survey = await this.universityService.modifyInternshipCertification(
+      const internshipReport = Object.values(report)[0];
+      const feedback = await this.universityService.modifyInternshipFeedback(
+        studentId,
+        dto.internshipFeedback.toLowerCase(),
+      );
+      const internshipFeedback = Object.values(feedback)[0];
+      const survey = await this.universityService.modifyInternshipSurvey(
         studentId,
         dto.internshipSurvey.toLowerCase(),
       );
+      const internshipSurvey = Object.values(survey)[0];
       return {
-        certification,
-        report,
-        feedback,
-        survey,
+        studentId,
+        internshipCertification,
+        internshipReport,
+        internshipFeedback,
+        internshipSurvey,
         message: 'Successfully updated',
       };
     } catch (error) {
@@ -792,40 +796,32 @@ export class UniversityController {
           'This student does not exist in our system...',
           HttpStatus.BAD_REQUEST,
         );
+      } else if (
+        dto.internshipFirstGrade < 0 ||
+        dto.internshipSecondGrade < 0 ||
+        dto.internshipThirdGrade < 0
+      ) {
+        throw new HttpException(
+          'Internship grade must be between 0 and 10',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else if (
+        dto.internshipFirstGrade > 10 ||
+        dto.internshipSecondGrade > 10 ||
+        dto.internshipThirdGrade > 10
+      ) {
+        throw new HttpException(
+          'Internship grade must be between 0 and 10',
+          HttpStatus.BAD_REQUEST,
+        );
       } else {
-        if (
-          dto.internshipFirstGrade < 0 &&
-          dto.internshipSecondGrade < 0 &&
-          dto.internshipThirdGrade < 0
-        ) {
-          dto.internshipFirstGrade =
-            dto.internshipSecondGrade =
-            dto.internshipThirdGrade =
-              0;
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            dto,
-          );
-          return result;
-        } else if (
-          dto.internshipFirstGrade > 10 &&
-          dto.internshipSecondGrade > 10 &&
-          dto.internshipThirdGrade > 10
-        ) {
-          dto.internshipFirstGrade =
-            dto.internshipSecondGrade =
-            dto.internshipThirdGrade =
-              10;
-          dto.fullName =
-            dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-          const result = await this.universityService.UpdateStudentInformation(
-            id,
-            dto,
-          );
-          return result;
-        }
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          dto,
+        );
+        return result;
       }
     } catch (error) {
       this.logger.error(error.message);
@@ -850,8 +846,8 @@ export class UniversityController {
         );
       }
       if (Object.values(teacher)[0][1] != [])
-        console.log(Object.values(teacher)[0][1].id);
-      const studentId = Object.values(teacher)[0][1].id;
+        console.log(Object.values(teacher)[0][1]);
+      // const studentId = Object.values(teacher)[0][1].id;
 
       if (Object.values(teacher)[0][0].maximumStudentAmount == 0) {
         if (dto.maximumStudentAmount > 0) {
