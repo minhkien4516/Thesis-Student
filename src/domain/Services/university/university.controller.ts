@@ -161,11 +161,14 @@ export class UniversityController {
                 Object.values(teacher)[0][0].fullName.toString() || '',
             },
           );
+          const response = await this.universityService.getTeacherById(
+            item.teacherId,
+          );
           return {
             result,
-            teacher: Object.values(teacher)[0],
-            student: Object.values(teacher)[1] || [],
-            studentWaitingAccepted: Object.values(teacher)[2] || [],
+            teacher: Object.values(response)[0],
+            student: Object.values(response)[1] || [],
+            studentWaitingAccepted: Object.values(response)[2] || [],
             message: 'Successfully accepted',
           };
         }),
