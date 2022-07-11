@@ -284,24 +284,23 @@ export class UniversityController {
               nameTeacher: '',
             },
           );
-          if (Object.values(teacher)[0][0].studentAmount > 0) {
-            await this.universityService.UpdateTeacherInformation(
-              item.teacherId,
-              {
-                studentAmount: Object.values(teacher)[0][0].studentAmount - 1,
-              },
-            );
-            return {
-              teacher,
-              status: HttpStatus.OK,
-              message: 'Successfully rejected',
-            };
-          } else {
-            throw new HttpException(
-              'This teacher has no students',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
+          await this.universityService.UpdateTeacherInformation(
+            item.teacherId,
+            {
+              studentAmount:
+                Object.values(teacher)[0][0].studentAmount - 1 || 0,
+            },
+          );
+          const result = await this.universityService.getTeacherById(
+            item.teacherId,
+          );
+          return {
+            result: Object.values(result)[0],
+            student: Object.values(result)[1] || [],
+            studentWaitingAccepted: Object.values(result)[2] || [],
+            status: HttpStatus.OK,
+            message: 'Successfully rejected',
+          };
         }),
       );
       return rejected;
@@ -1110,8 +1109,18 @@ export class UniversityController {
         await this.universityService.getTotalTeachersInUniversityForClient(
           academicYear,
         );
-      if (Object.values(total)[0] > 0 && data.length > 0)
+      if (Object.values(total)[0] > 0 && data.length > 0) {
+        await Promise.all(
+          data.map(async (teacher) => {
+            const result = await this.universityService.getTeacherById(
+              teacher.id,
+            );
+            teacher.details = result;
+            return teacher;
+          }),
+        );
         return { data, pagination: total };
+      }
       return { data: [], pagination: { total: 0 } };
     } catch (error) {
       this.logger.error(error.message);

@@ -15,6 +15,7 @@ export interface TeachersFilter {
   updatedAt: string;
   details?: TeacherDetail[];
 }
+
 export interface TeachersFilterResponse {
   data: TeachersFilter[];
   pagination?;
