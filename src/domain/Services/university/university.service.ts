@@ -239,7 +239,7 @@ export class UniversityService {
       const inserted: StudentsFilter[] = await this.sequelize.query(
         'SP_AddNewStudents @firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
-          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
+          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,@specialization=:specialization,' +
           '@internshipFirstGrade=:internshipFirstGrade,@internshipSecondGrade=:internshipSecondGrade,@internshipThirdGrade=:internshipThirdGrade',
         {
           type: QueryTypes.SELECT,
@@ -257,6 +257,7 @@ export class UniversityService {
             status: addNewStudentsDto.status,
             academicYear: addNewStudentsDto.academicYear,
             nameTeacher: addNewStudentsDto.nameTeacher,
+            specialization: addNewStudentsDto.specialization,
             internshipFirstGrade: addNewStudentsDto.internshipFirstGrade,
             internshipSecondGrade: addNewStudentsDto.internshipSecondGrade,
             internshipThirdGrade: addNewStudentsDto.internshipThirdGrade,
@@ -280,7 +281,7 @@ export class UniversityService {
       const updated = await this.sequelize.query(
         'SP_UpdateStudent @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
           '@birthDate=:birthDate,@identityNumber=:identityNumber, @phoneNumber=:phoneNumber, @address=:address, @class=:class,' +
-          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,' +
+          '@term=:term,@status=:status,@academicYear=:academicYear,@nameTeacher=:nameTeacher,@slug=:slug,@specialization=:specialization,' +
           '@internshipFirstGrade=:internshipFirstGrade,@internshipSecondGrade=:internshipSecondGrade,@internshipThirdGrade=:internshipThirdGrade',
         {
           type: QueryTypes.SELECT,
@@ -299,6 +300,7 @@ export class UniversityService {
             status: updateStudentDto.status ?? null,
             academicYear: updateStudentDto.academicYear ?? null,
             nameTeacher: updateStudentDto.nameTeacher ?? null,
+            specialization: updateStudentDto.specialization ?? null,
             slug: updateStudentDto.slug ?? null,
             internshipFirstGrade: updateStudentDto.internshipFirstGrade ?? null,
             internshipSecondGrade:
@@ -797,7 +799,7 @@ export class UniversityService {
     try {
       const total: StudentsFilter[] = await this.sequelize.query(
         'SP_GetStudentByConditions @identityNumber=:identityNumber,@fullName=:fullName, @limit=:limit,' +
-          '@offset=:offset,@status=:status,@term=:term,' +
+          '@offset=:offset,@status=:status,@term=:term,@specialization=:specialization,' +
           '@academicYear=:academicYear,@nameTeacher=:nameTeacher',
         {
           type: QueryTypes.SELECT,
@@ -810,6 +812,7 @@ export class UniversityService {
             status: filterStudentDto.status ?? null,
             academicYear: filterStudentDto.academicYear ?? null,
             nameTeacher: filterStudentDto.nameTeacher ?? null,
+            specialization: filterStudentDto.specialization ?? null,
           },
           raw: true,
         },
@@ -853,7 +856,7 @@ export class UniversityService {
     try {
       const total = await this.sequelize.query(
         'SP_GetTotalStudentsByConditions @identityNumber=:identityNumber,@fullName=:fullName,@status=:status,@term=:term,' +
-          '@academicYear=:academicYear,@nameTeacher=:nameTeacher',
+          '@academicYear=:academicYear,@nameTeacher=:nameTeacher,@specialization=:specialization',
         {
           type: QueryTypes.SELECT,
           replacements: {
@@ -863,6 +866,7 @@ export class UniversityService {
             term: filterStudentDto?.term,
             academicYear: filterStudentDto?.academicYear,
             nameTeacher: filterStudentDto?.nameTeacher,
+            specialization: filterStudentDto?.specialization,
           },
           raw: true,
         },

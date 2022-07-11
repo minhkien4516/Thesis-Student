@@ -58,6 +58,10 @@ export class AddNewStudentsByImportDto {
   nameTeacher?: string | null;
 
   @IsOptional()
+  @IsString()
+  specialization?: string | null;
+
+  @IsOptional()
   @IsNumber()
   internshipFirstGrade?: number | null;
 

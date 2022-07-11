@@ -13,6 +13,7 @@ export interface StudentsFilter {
   address?: string;
   phoneNumber?: string;
   nameTeacher?: string;
+  specialization?: string;
   internshipCertification?: string;
   internshipReport?: string;
   internshipFeedback?: string;
@@ -40,6 +41,7 @@ export interface StudentFilter {
   address?: string;
   phoneNumber?: string;
   nameTeacher?: string;
+  specialization?: string;
   internshipCertification?: string;
   internshipReport?: string;
   internshipFeedback?: string;

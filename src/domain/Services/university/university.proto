@@ -33,14 +33,15 @@ message Student {
     string academicYear = 13;
     string slug = 14;
     string nameTeacher = 15;
-    bool internshipCertification = 16;
-    bool internshipReport = 17;
-    bool internshipFeedback = 18;
-    bool internshipSurvey = 19;
-    int32 internshipFirstGrade = 20;
-    int32 internshipSecondGrade = 21;
-    int32 internshipThirdGrade = 22;
-    int32 internshipFinalGrade = 23;
+    string specialization = 16;
+    bool internshipCertification = 17;
+    bool internshipReport = 18;
+    bool internshipFeedback = 19;
+    bool internshipSurvey = 20;
+    int32 internshipFirstGrade = 21;
+    int32 internshipSecondGrade = 22;
+    int32 internshipThirdGrade = 23;
+    int32 internshipFinalGrade = 24;
 }
 
 message StudentWaitingAccepted {
@@ -59,14 +60,15 @@ message StudentWaitingAccepted {
     string academicYear = 13;
     string slug = 14;
     string nameTeacher = 15;
-    bool internshipCertification = 16;
-    bool internshipReport = 17;
-    bool internshipFeedback = 18;
-    bool internshipSurvey = 19;
-    int32 internshipFirstGrade = 20;
-    int32 internshipSecondGrade = 21;
-    int32 internshipThirdGrade = 22;
-    int32 internshipFinalGrade = 23;
+    string specialization = 16;
+    bool internshipCertification = 17;
+    bool internshipReport = 18;
+    bool internshipFeedback = 19;
+    bool internshipSurvey = 20;
+    int32 internshipFirstGrade = 21;
+    int32 internshipSecondGrade = 22;
+    int32 internshipThirdGrade = 23;
+    int32 internshipFinalGrade = 24;
 }
 
 message Contact {
@@ -161,17 +163,18 @@ message StudentFilter {
     string academicYear = 13;
     string nameTeacher = 14;
     string slug = 15;
-    string internshipCertification = 16;
-    string internshipReport = 17;
-    string internshipFeedback = 18;
-    string internshipSurvey = 19;
-    string internshipFirstGrade = 20;
-    string internshipSecondGrade = 21;
-    string internshipThirdGrade = 22;
-    string internshipFinalGrade = 23;
-    repeated CV cv = 24;
-    repeated Teacher teacher = 25;
-    repeated Detail detail = 26;
+    string specialization = 16;
+    bool internshipCertification = 17;
+    bool internshipReport = 18;
+    bool internshipFeedback = 19;
+    bool internshipSurvey = 20;
+    int32 internshipFirstGrade = 21;
+    int32 internshipSecondGrade = 22;
+    int32 internshipThirdGrade = 23;
+    int32 internshipFinalGrade = 24;
+    repeated CV cv = 25;
+    repeated Teacher teacher = 26;
+    repeated Detail detail = 27;
 }
 
 message Detail {

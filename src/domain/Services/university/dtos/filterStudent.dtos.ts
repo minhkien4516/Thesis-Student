@@ -24,4 +24,8 @@ export class FilterStudentDto {
   @IsOptional()
   @IsString()
   nameTeacher?: string | null;
+
+  @IsOptional()
+  @IsString()
+  specialization?: string | null;
 }

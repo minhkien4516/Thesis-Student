@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class AddNewTeachersByImportDto {
   @IsString()
@@ -31,10 +37,12 @@ export class AddNewTeachersByImportDto {
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
   studentAmount?: number | null;
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
   maximumStudentAmount?: number | null;
 
   @IsString()

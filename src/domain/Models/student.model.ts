@@ -16,6 +16,7 @@ export class Student extends Model {
   address: string;
   phoneNumber: string;
   nameTeacher: string;
+  specialization: string;
   internshipCertification: string;
   internshipReport: string;
   internshipGrade: number;

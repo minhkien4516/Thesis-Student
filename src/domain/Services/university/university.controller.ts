@@ -63,6 +63,7 @@ import { SaveTeacherAccountForOwnerRequest } from '../../interfaces/saveTeacherA
 import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 import { getTeacherByIdForLoginRequest } from '../../interfaces/getTeacherByIdForLoginRequest ';
 import { ModifyInternship } from './dtos/modifyInternship.dtos';
+import EmailService from '../../../utils/email/email.service';
 
 @Controller('university')
 export class UniversityController {
@@ -73,6 +74,7 @@ export class UniversityController {
     private readonly fileService: FilesService,
     private readonly authService: AuthService,
     private readonly résumeService: RésumeService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Post('/student/register-teacher')
@@ -80,15 +82,19 @@ export class UniversityController {
     try {
       const multiRegistration = await Promise.all(
         dto.teacher.map(async (item) => {
-          const temp = await this.universityService.getTeacherById(
+          const teacherTemp = await this.universityService.getTeacherById(
             item.teacherId,
           );
-          if (Object.values(temp)[0][0] === undefined)
+          const studentTemp =
+            await this.universityService.getStudentByIdForClient(
+              item.studentId,
+            );
+          if (Object.values(teacherTemp)[0][0] === undefined)
             throw new HttpException(
               'This teacher does not exist in system....',
               HttpStatus.BAD_REQUEST,
             );
-          if (Object.values(temp)[0][0].maximumStudentAmount === 0) {
+          if (Object.values(teacherTemp)[0][0].maximumStudentAmount === 0) {
             const register =
               await this.universityService.registerTeacherForStudent(item);
             if (!register) {
@@ -97,12 +103,30 @@ export class UniversityController {
                 HttpStatus.BAD_REQUEST,
               );
             } else {
+              await this.emailService.sendMailToTeacher(
+                // Object.values(teacherTemp)[0][0].email,
+                // 'thoa010600@gmail.com',
+                // 'tranltb@huflit.edu.vn',
+                // '18dh110815@st.huflit.edu.vn',
+                'kienmaitrungminh@gmail.com',
+                Object.values(teacherTemp)[0][0].fullName,
+                studentTemp.email,
+                studentTemp.firstName,
+                studentTemp.lastName,
+                studentTemp.identityNumber,
+                studentTemp.term,
+                studentTemp.academicYear,
+                studentTemp.class,
+                studentTemp.specialization,
+              );
               return { register, message: 'Successfully registered' };
             }
-          } else if (Object.values(temp)[0][0].maximumStudentAmount > 0) {
+          } else if (
+            Object.values(teacherTemp)[0][0].maximumStudentAmount > 0
+          ) {
             if (
-              Object.values(temp)[0][0].studentAmount <
-              Object.values(temp)[0][0].maximumStudentAmount
+              Object.values(teacherTemp)[0][0].studentAmount <
+              Object.values(teacherTemp)[0][0].maximumStudentAmount
             ) {
               const register =
                 await this.universityService.registerTeacherForStudent(item);
@@ -112,6 +136,22 @@ export class UniversityController {
                   HttpStatus.BAD_REQUEST,
                 );
               } else {
+                await this.emailService.sendMailToTeacher(
+                  // Object.values(teacherTemp)[0][0].email,
+                  // 'thoa010600@gmail.com',
+                  // 'tranltb@huflit.edu.vn',
+                  // '18dh110815@st.huflit.edu.vn',
+                  'kienmaitrungminh@gmail.com',
+                  Object.values(teacherTemp)[0][0].fullName,
+                  studentTemp.email,
+                  studentTemp.firstName,
+                  studentTemp.lastName,
+                  studentTemp.identityNumber,
+                  studentTemp.term,
+                  studentTemp.academicYear,
+                  studentTemp.class,
+                  studentTemp.specialization,
+                );
                 const teacher = await this.universityService.getTeacherById(
                   item.teacherId,
                 );
@@ -252,6 +292,7 @@ export class UniversityController {
               },
             );
             return {
+              teacher,
               status: HttpStatus.OK,
               message: 'Successfully rejected',
             };
@@ -336,6 +377,7 @@ export class UniversityController {
         jsonData.map(async (student) => {
           const dto = new AddNewStudentsByImportDto();
           dto.class = student['Lớp'];
+          dto.specialization = student['Chuyên ngành'];
           dto.birthDate = student['Ngày sinh'];
           dto.identityNumber = student['Mã số SV'];
           dto.lastName = student['Họ và tên đệm'] || '';
