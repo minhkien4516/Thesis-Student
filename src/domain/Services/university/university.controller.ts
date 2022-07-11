@@ -284,13 +284,14 @@ export class UniversityController {
               nameTeacher: '',
             },
           );
-          await this.universityService.UpdateTeacherInformation(
-            item.teacherId,
-            {
-              studentAmount:
-                Object.values(teacher)[0][0].studentAmount - 1 || 0,
-            },
-          );
+          if (Object.values(teacher)[0][0].studentAmount <= 0) {
+            await this.universityService.UpdateTeacherInformation(
+              item.teacherId,
+              {
+                studentAmount: 0,
+              },
+            );
+          }
           const result = await this.universityService.getTeacherById(
             item.teacherId,
           );
