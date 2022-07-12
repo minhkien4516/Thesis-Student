@@ -654,6 +654,60 @@ export class UniversityService {
     }
   }
 
+  public async getAllSpecializationForClient(academicYear?: string) {
+    try {
+      const specialization = await this.sequelize.query(
+        'SP_GetAllSpecialization @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return specialization;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllDepartmentForClient(academicYear?: string) {
+    try {
+      const department = await this.sequelize.query(
+        'SP_GetAllDepartment @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return department;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  public async getAllPositionForClient(academicYear?: string) {
+    try {
+      const Position = await this.sequelize.query(
+        'SP_GetAllPosition @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            academicYear,
+          },
+        },
+      );
+      return Position;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
   public async getStudentReportForUniversity(academicYear?: string) {
     try {
       const report = await this.sequelize.query(

@@ -57,6 +57,57 @@ export default class EmailService {
     }
   }
 
+  async sendAcceptedMailToStudent(
+    teacherEmail: string,
+    teacherName: string,
+    studentEmail: string,
+    firstName: string,
+    lastName: string,
+    identityNumber: string,
+    term: string,
+    academicYear: string,
+    Class: string,
+    specialization: string,
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        from: teacherEmail,
+        to: studentEmail,
+        subject: 'Đăng kí giảng viên hướng dẫn',
+        context: {
+          teacherEmail,
+          teacherName,
+          studentEmail,
+          firstName,
+          lastName,
+          identityNumber,
+          term,
+          academicYear,
+          Class,
+          specialization,
+        },
+        html:
+          `<h3 style='color: #0194f3'>Kính chào quý thầy/cô <b>${teacherName}</b></h3>` +
+          `<p>Em xin giới thiệu</p>` +
+          `<p> - Họ tên: <b>${lastName} ${firstName}</b></p>` +
+          `<p> - Sinh viên <b>${term}</b> khóa học <b>${
+            parseInt(academicYear) - 4
+          }-${academicYear}</b></p>` +
+          `<p> - Mã số sinh viên: <b>${identityNumber}</b></p>` +
+          `<p> - Lớp: <b>${Class}</b></p>` +
+          `<p> - Chuyên ngành: <b>${specialization}</b></p>` +
+          `<p>Em gửi thư này xin đăng ký quý thầy/cô là <b>Giảng viên hướng dẫn</b> môn <b>Đồ án 2 (Thực tập tốt nghiệp)</b> năm học ${academicYear}.</p>` +
+          `<p>Kính mong thầy/cô xem xét và chấp nhận,</p>` +
+          `<p>Em xin chân thành cảm ơn quý thầy/cô</p>` +
+          `<h4><i>Trân trọng,</i></h4>` +
+          `<h4><i>${lastName} ${firstName}</i></h4>` +
+          `<h4><i>From: ${studentEmail}</i></h4>`,
+      });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async sendMailToTeacher(
     teacherEmail: string,
     teacherName: string,

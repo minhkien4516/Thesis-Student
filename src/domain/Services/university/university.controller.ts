@@ -1060,6 +1060,56 @@ export class UniversityController {
     }
   }
 
+  @Get('student/specialization')
+  public async getAllSpecialization(
+    @Query('academicYear') academicYear: string,
+  ) {
+    try {
+      const result = await this.universityService.getAllSpecializationForClient(
+        academicYear,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('teacher/department')
+  public async getAllDepartment(@Query('academicYear') academicYear: string) {
+    try {
+      const result = await this.universityService.getAllDepartmentForClient(
+        academicYear,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  @Get('teacher/position')
+  public async getAllPosition(@Query('academicYear') academicYear: string) {
+    try {
+      const result = await this.universityService.getAllPositionForClient(
+        academicYear,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   @Get('/studentReport')
   public async getStudentReportForClient(
     @Query('academicYear') academicYear: string,
