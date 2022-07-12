@@ -1401,13 +1401,9 @@ export class UniversityController {
             const relevant = await this.universityService.getTeacherById(
               item.id,
             );
-            if (Object.values(relevant)[0][1] == undefined) {
-              return (item.details = []);
-            } else {
-              const student: TeacherDetail = Object.values(relevant)[0][1];
-              item.details = [student];
-              return item.details;
-            }
+
+            item.details = relevant;
+            return item.details;
           }),
         );
         return { data, pagination: total };
