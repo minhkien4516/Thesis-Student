@@ -204,6 +204,18 @@ export class UniversityController {
           const response = await this.universityService.getTeacherById(
             item.teacherId,
           );
+          const studentTemp =
+            await this.universityService.getStudentByIdForClient(
+              item.studentId,
+            );
+          await this.emailService.sendAcceptedMailToStudent(
+            Object.values(response)[0][0].email,
+            Object.values(response)[0][0].fullName,
+            Object.values(response)[0][0].phoneNumber,
+            studentTemp.email,
+            studentTemp.fullName,
+            studentTemp.academicYear,
+          );
           return {
             result,
             teacher: Object.values(response)[0],
@@ -294,6 +306,19 @@ export class UniversityController {
           }
           const result = await this.universityService.getTeacherById(
             item.teacherId,
+          );
+          const studentTemp =
+            await this.universityService.getStudentByIdForClient(
+              item.studentId,
+            );
+          await this.emailService.sendRejectedMailToStudent(
+            Object.values(result)[0][0].email,
+            Object.values(result)[0][0].fullName,
+            Object.values(result)[0][0].phoneNumber,
+            studentTemp.email,
+            studentTemp.fullName,
+            studentTemp.academicYear,
+            item.reason == undefined ? 'Thầy/Cô có việc bận' : item.reason,
           );
           return {
             result: Object.values(result)[0],

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class RegisterTeacherForStudentDto {
   @IsNotEmpty()
@@ -8,6 +8,10 @@ export class RegisterTeacherForStudentDto {
   @IsNotEmpty()
   @IsString()
   teacherId: string | null;
+
+  @IsOptional()
+  @IsString()
+  reason?: string | null;
 }
 
 export class RegisterTeacherForStudentsDto {
