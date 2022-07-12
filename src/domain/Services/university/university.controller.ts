@@ -103,22 +103,22 @@ export class UniversityController {
                 HttpStatus.BAD_REQUEST,
               );
             } else {
-              await this.emailService.sendMailToTeacher(
-                // Object.values(teacherTemp)[0][0].email,
-                // 'thoa010600@gmail.com',
-                // 'tranltb@huflit.edu.vn',
-                // '18dh110815@st.huflit.edu.vn',
-                'kienmaitrungminh@gmail.com',
-                Object.values(teacherTemp)[0][0].fullName,
-                studentTemp.email,
-                studentTemp.firstName,
-                studentTemp.lastName,
-                studentTemp.identityNumber,
-                studentTemp.term,
-                studentTemp.academicYear,
-                studentTemp.class,
-                studentTemp.specialization,
-              );
+              // await this.emailService.sendMailToTeacher(
+              //   // Object.values(teacherTemp)[0][0].email,
+              //   // 'thoa010600@gmail.com',
+              //   // 'tranltb@huflit.edu.vn',
+              //   // '18dh110815@st.huflit.edu.vn',
+              //   'kienmaitrungminh@gmail.com',
+              //   Object.values(teacherTemp)[0][0].fullName,
+              //   studentTemp.email,
+              //   studentTemp.firstName,
+              //   studentTemp.lastName,
+              //   studentTemp.identityNumber,
+              //   studentTemp.term,
+              //   studentTemp.academicYear,
+              //   studentTemp.class,
+              //   studentTemp.specialization,
+              // );
               return { register, message: 'Successfully registered' };
             }
           } else if (
@@ -136,22 +136,22 @@ export class UniversityController {
                   HttpStatus.BAD_REQUEST,
                 );
               } else {
-                await this.emailService.sendMailToTeacher(
-                  // Object.values(teacherTemp)[0][0].email,
-                  // 'thoa010600@gmail.com',
-                  // 'tranltb@huflit.edu.vn',
-                  // '18dh110815@st.huflit.edu.vn',
-                  'kienmaitrungminh@gmail.com',
-                  Object.values(teacherTemp)[0][0].fullName,
-                  studentTemp.email,
-                  studentTemp.firstName,
-                  studentTemp.lastName,
-                  studentTemp.identityNumber,
-                  studentTemp.term,
-                  studentTemp.academicYear,
-                  studentTemp.class,
-                  studentTemp.specialization,
-                );
+                // await this.emailService.sendMailToTeacher(
+                //   // Object.values(teacherTemp)[0][0].email,
+                //   // 'thoa010600@gmail.com',
+                //   // 'tranltb@huflit.edu.vn',
+                //   // '18dh110815@st.huflit.edu.vn',
+                //   'kienmaitrungminh@gmail.com',
+                //   Object.values(teacherTemp)[0][0].fullName,
+                //   studentTemp.email,
+                //   studentTemp.firstName,
+                //   studentTemp.lastName,
+                //   studentTemp.identityNumber,
+                //   studentTemp.term,
+                //   studentTemp.academicYear,
+                //   studentTemp.class,
+                //   studentTemp.specialization,
+                // );
                 const teacher = await this.universityService.getTeacherById(
                   item.teacherId,
                 );
