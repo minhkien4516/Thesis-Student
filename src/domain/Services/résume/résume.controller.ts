@@ -39,25 +39,10 @@ export class RésumeController {
   public async addNewRésume(
     @Query('studentId') studentId: string,
     @Body() addNewRésume: AddNewRésumeDto,
+    @UploadedFiles() files: { files?: Express.Multer.File[] },
   ): Promise<RésumeFilter[]> {
+    console.log(files);
     try {
-      if (Object.values(JSON.parse(addNewRésume.files)).length <= 0) {
-        throw new HttpException('Cannot add image', HttpStatus.BAD_REQUEST);
-      }
-      const encodedFile = Object.values(JSON.parse(addNewRésume.files))[0];
-      const images = await Buffer.from(encodedFile[0].uri, 'utf-8');
-
-      const files = {
-        files: [
-          {
-            fieldname: 'files',
-            originalname: encodedFile[0].originalname,
-            encoding: '7bit',
-            mimetype: encodedFile[0].mimetype,
-            buffer: images,
-          },
-        ],
-      };
       const result = await this.résumeService.addNewRésume({
         ...addNewRésume,
       });
@@ -83,6 +68,54 @@ export class RésumeController {
     }
   }
 
+  // @Post()
+  // @UseInterceptors(FileFieldsInterceptor([{ name: 'files' }]))
+  // public async addNewRésume(
+  //   @Query('studentId') studentId: string,
+  //   @Body() addNewRésume: AddNewRésumeDto,
+  // ): Promise<RésumeFilter[]> {
+  //   try {
+  //     if (Object.values(JSON.parse(addNewRésume.files)).length <= 0) {
+  //       throw new HttpException('Cannot add image', HttpStatus.BAD_REQUEST);
+  //     }
+  //     const encodedFile = Object.values(JSON.parse(addNewRésume.files))[0];
+  //     const images = await Buffer.from(encodedFile[0].uri, 'utf-8');
+
+  //     const files = {
+  //       files: [
+  //         {
+  //           fieldname: 'files',
+  //           originalname: encodedFile[0].originalname,
+  //           encoding: '7bit',
+  //           mimetype: encodedFile[0].mimetype,
+  //           buffer: images,
+  //         },
+  //       ],
+  //     };
+  //     const result = await this.résumeService.addNewRésume({
+  //       ...addNewRésume,
+  //     });
+  //     await this.résumeService.addStudentResume({
+  //       cvId: Object.values(result)[0].id,
+  //       studentId,
+  //     });
+  //     await this.uploadImages(Object.values(result)[0].id, files.files);
+  //     await Promise.all(
+  //       result.map(async (item) => {
+  //         const { files } = await this.getImages(item.id);
+  //         item.images = files;
+  //         return item.images;
+  //       }),
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     this.logger.error(error.message);
+  //     throw new HttpException(
+  //       error.message,
+  //       error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+  //     );
+  //   }
+  // }
   @Patch()
   public async updateRésume(
     @Query('id') id: string,

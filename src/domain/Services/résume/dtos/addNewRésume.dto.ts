@@ -20,8 +20,4 @@ export class AddNewRésumeDto {
   @IsString()
   @IsOptional()
   slug?: string | null;
-
-  @IsString()
-  @IsOptional()
-  files?: string | null;
 }
