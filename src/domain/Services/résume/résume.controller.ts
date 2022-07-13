@@ -42,6 +42,8 @@ export class RésumeController {
     @UploadedFiles() files: { files?: Express.Multer.File[] },
   ): Promise<RésumeFilter[]> {
     console.log(files);
+    console.log(files.files);
+
     try {
       const result = await this.résumeService.addNewRésume({
         ...addNewRésume,
@@ -50,7 +52,22 @@ export class RésumeController {
         cvId: Object.values(result)[0].id,
         studentId,
       });
-      await this.uploadImages(Object.values(result)[0].id, files.files);
+      const images = await Buffer.from(
+        'file:///var/mobile/Containers/Data/Application/7947C969-0D8E-4927-986E-34EB54A7DB22/Library/Caches/ExponentExperienceData/%2540anonymous%252Fsupported-internship-app-eae4be00-0eb3-4d2e-bf32-359455023923/ImagePicker/26D11006-33D4-4F9A-A93E-60828AA7CA18.jpg',
+        'utf-8',
+      );
+
+      await this.uploadImages(Object.values(result)[0].id, [
+        {
+          fieldname: 'files',
+          originalname: '26D11006-33D4-4F9A-A93E-60828AA7CA18.jpg',
+          encoding: '7bit',
+          mimetype: 'image/jpg',
+          buffer: images,
+          size: 275575,
+        },
+      ]);
+      // await this.uploadImages(Object.values(result)[0].id, files.files);
       await Promise.all(
         result.map(async (item) => {
           const { files } = await this.getImages(item.id);
@@ -188,7 +205,7 @@ export class RésumeController {
   }
 
   public async uploadImages(
-    corporationId: string,
+    cvId: string,
     filesParam: any[],
   ): Promise<UploadFilesForOwnerResponse> {
     const file = filesParam.map((index) => ({
@@ -198,7 +215,7 @@ export class RésumeController {
     }));
     const files = await firstValueFrom(
       this.fileService.uploadForOwner({
-        ownerId: corporationId,
+        ownerId: cvId,
         files: file,
       }),
     );

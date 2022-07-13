@@ -1,7 +1,7 @@
 import { Model } from 'sequelize-typescript';
 
 export class Teacher extends Model {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   fullName: string;

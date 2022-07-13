@@ -17,12 +17,37 @@ import { RegisterTeacherForStudentDto } from './dtos/registerTeacherForStudent.d
 import { SaveStudentAccountForOwnerRequest } from '../../interfaces/saveStudentAccountForOwnerRequest.interface';
 import { SaveTeacherAccountForOwnerResponse } from '../../interfaces/saveTeacherAccountForOwnerResponse.interface';
 import { ModifyInternship } from './dtos/modifyInternship.dtos';
+import { Teacher } from '../../Models/teacher.model';
 
 @Injectable()
 export class UniversityService {
   private readonly logger = new Logger('UniversityService');
 
   constructor(private readonly sequelize: Sequelize) {}
+
+  async getTeacherByNameAndAcademicYear(
+    lastName: string,
+    firstName: string,
+    fullName: string,
+    academicYear: string,
+  ): Promise<Teacher> {
+    try {
+      const teacher = await this.sequelize.query(
+        'SP_GetTeacherByNameAndAcademicYear @lastName=:lastName, @firstName=:firstName, @fullName=:fullName, @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: { lastName, firstName, fullName, academicYear },
+          raw: true,
+          mapToModel: true,
+          model: Teacher,
+        },
+      );
+      return teacher[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
 
   public async addNewTeacher(
     addNewTeachersByImportDto: AddNewTeachersByImportDto,
@@ -221,6 +246,37 @@ export class UniversityService {
         },
       );
       return updated[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getStudentByNameAndAcademicYear(
+    lastName: string,
+    firstName: string,
+    fullName: string,
+    identityNumber: string,
+    academicYear: string,
+  ): Promise<Student> {
+    try {
+      const student = await this.sequelize.query(
+        'SP_GetStudentByNameAndAcademicYear @lastName=:lastName, @firstName=:firstName, @fullName=:fullName,@identityNumber=:identityNumber, @academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            lastName,
+            firstName,
+            fullName,
+            identityNumber,
+            academicYear,
+          },
+          raw: true,
+          mapToModel: true,
+          model: Student,
+        },
+      );
+      return student[0];
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

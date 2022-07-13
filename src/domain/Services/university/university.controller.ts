@@ -103,22 +103,22 @@ export class UniversityController {
                 HttpStatus.BAD_REQUEST,
               );
             } else {
-              // await this.emailService.sendMailToTeacher(
-              //   // Object.values(teacherTemp)[0][0].email,
-              //   // 'thoa010600@gmail.com',
-              //   // 'tranltb@huflit.edu.vn',
-              //   // '18dh110815@st.huflit.edu.vn',
-              //   'kienmaitrungminh@gmail.com',
-              //   Object.values(teacherTemp)[0][0].fullName,
-              //   studentTemp.email,
-              //   studentTemp.firstName,
-              //   studentTemp.lastName,
-              //   studentTemp.identityNumber,
-              //   studentTemp.term,
-              //   studentTemp.academicYear,
-              //   studentTemp.class,
-              //   studentTemp.specialization,
-              // );
+              await this.emailService.sendMailToTeacher(
+                Object.values(teacherTemp)[0][0].email,
+                // 'thoa010600@gmail.com',
+                // 'tranltb@huflit.edu.vn',
+                // '18dh110815@st.huflit.edu.vn',
+                // 'kienmaitrungminh@gmail.com',
+                Object.values(teacherTemp)[0][0].fullName,
+                studentTemp.email,
+                studentTemp.firstName,
+                studentTemp.lastName,
+                studentTemp.identityNumber,
+                studentTemp.term,
+                studentTemp.academicYear,
+                studentTemp.class,
+                studentTemp.specialization,
+              );
               return { register, message: 'Successfully registered' };
             }
           } else if (
@@ -136,22 +136,22 @@ export class UniversityController {
                   HttpStatus.BAD_REQUEST,
                 );
               } else {
-                // await this.emailService.sendMailToTeacher(
-                //   // Object.values(teacherTemp)[0][0].email,
-                //   // 'thoa010600@gmail.com',
-                //   // 'tranltb@huflit.edu.vn',
-                //   // '18dh110815@st.huflit.edu.vn',
-                //   'kienmaitrungminh@gmail.com',
-                //   Object.values(teacherTemp)[0][0].fullName,
-                //   studentTemp.email,
-                //   studentTemp.firstName,
-                //   studentTemp.lastName,
-                //   studentTemp.identityNumber,
-                //   studentTemp.term,
-                //   studentTemp.academicYear,
-                //   studentTemp.class,
-                //   studentTemp.specialization,
-                // );
+                await this.emailService.sendMailToTeacher(
+                  Object.values(teacherTemp)[0][0].email,
+                  // 'thoa010600@gmail.com',
+                  // 'tranltb@huflit.edu.vn',
+                  // '18dh110815@st.huflit.edu.vn',
+                  // 'kienmaitrungminh@gmail.com',
+                  Object.values(teacherTemp)[0][0].fullName,
+                  studentTemp.email,
+                  studentTemp.firstName,
+                  studentTemp.lastName,
+                  studentTemp.identityNumber,
+                  studentTemp.term,
+                  studentTemp.academicYear,
+                  studentTemp.class,
+                  studentTemp.specialization,
+                );
                 const teacher = await this.universityService.getTeacherById(
                   item.teacherId,
                 );
@@ -424,6 +424,22 @@ export class UniversityController {
           dto.internshipFirstGrade = student['Điểm 1'].toFixed(2);
           dto.internshipSecondGrade = student['Điểm 2'].toFixed(2);
           dto.internshipThirdGrade = student['Điểm 3'].toFixed(2);
+          const checkStudent =
+            await this.universityService.getStudentByNameAndAcademicYear(
+              dto.lastName,
+              dto.firstName,
+              dto.fullName,
+              dto.identityNumber,
+              dto.academicYear,
+            );
+          if (checkStudent) {
+            const result =
+              await this.universityService.UpdateStudentInformation(
+                checkStudent.id,
+                { ...dto },
+              );
+            return result;
+          }
           const relevant = await this.universityService.addNewStudent({
             ...dto,
           });
@@ -678,7 +694,6 @@ export class UniversityController {
       });
       const multiTeacher = await Promise.all(
         jsonData.map(async (teacher) => {
-          console.log(teacher['Số lượng SV']);
           const dto = new AddNewTeachersByImportDto();
           dto.position = teacher['Chức vụ'];
           dto.department = teacher['Bộ môn'];
@@ -690,6 +705,21 @@ export class UniversityController {
           dto.phoneNumber = teacher['Điện thoại'];
           dto.studentAmount = teacher['Số lượng SV hiện tại'];
           dto.maximumStudentAmount = teacher['Số lượng SV tối đa'];
+          const checkTeacher =
+            await this.universityService.getTeacherByNameAndAcademicYear(
+              dto.lastName,
+              dto.firstName,
+              dto.fullName,
+              dto.academicYear,
+            );
+          if (checkTeacher) {
+            const result =
+              await this.universityService.UpdateTeacherInformation(
+                checkTeacher.id,
+                { ...dto },
+              );
+            return result;
+          }
           const relevant = await this.universityService.addNewTeacher({
             ...dto,
           });
@@ -723,6 +753,23 @@ export class UniversityController {
           student.email =
             (student.identityNumber.toLowerCase() + MAIL_STUDENT).toString() ||
             '';
+
+          const checkStudent =
+            await this.universityService.getStudentByNameAndAcademicYear(
+              student.lastName,
+              student.firstName,
+              student.fullName,
+              student.identityNumber,
+              student.academicYear,
+            );
+          if (checkStudent) {
+            const result =
+              await this.universityService.UpdateStudentInformation(
+                checkStudent.id,
+                { ...student },
+              );
+            return result;
+          }
           const students = await this.universityService.addNewStudent(student);
           students.map(async (item) => {
             const student = await this.universityService.getStudentByIds(
@@ -755,6 +802,21 @@ export class UniversityController {
         dto.teachers.map(async (teacher) => {
           teacher.fullName =
             teacher.lastName.concat(' ', teacher.firstName) || ' ';
+          const checkTeacher =
+            await this.universityService.getTeacherByNameAndAcademicYear(
+              teacher.lastName,
+              teacher.firstName,
+              teacher.fullName,
+              teacher.academicYear,
+            );
+          if (checkTeacher) {
+            const result =
+              await this.universityService.UpdateTeacherInformation(
+                checkTeacher.id,
+                { ...teacher },
+              );
+            return result;
+          }
           const teachers = await this.universityService.addNewTeacher(teacher);
           teachers.map(async (item) => {
             const teacher = await this.universityService.getTeacherByIds(

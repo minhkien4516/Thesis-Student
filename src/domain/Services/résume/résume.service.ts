@@ -56,7 +56,6 @@ export class RésumeService {
           raw: true,
         },
       );
-      console.log(inserted);
       return inserted[0];
     } catch (error) {
       this.logger.error(error.message);
