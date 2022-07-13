@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddResumeCertificatedDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   cvId!: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   certificatedId!: string;
 }

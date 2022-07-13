@@ -1,16 +1,16 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddNewCertificatedDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   name?: string | null;
 
   @IsString()
-  @IsNotEmpty()
-  issueDate?: Date | null;
+  @IsOptional()
+  issueDate?: string | null;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   organizer?: string | null;
 }
 
