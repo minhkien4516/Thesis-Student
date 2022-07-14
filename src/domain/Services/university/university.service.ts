@@ -26,17 +26,15 @@ export class UniversityService {
   constructor(private readonly sequelize: Sequelize) {}
 
   async getTeacherByNameAndAcademicYear(
-    lastName: string,
-    firstName: string,
     fullName: string,
     academicYear: string,
   ): Promise<Teacher> {
     try {
       const teacher = await this.sequelize.query(
-        'SP_GetTeacherByNameAndAcademicYear @lastName=:lastName, @firstName=:firstName, @fullName=:fullName, @academicYear=:academicYear',
+        'SP_GetTeacherByNameAndAcademicYear  @fullName=:fullName, @academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
-          replacements: { lastName, firstName, fullName, academicYear },
+          replacements: { fullName, academicYear },
           raw: true,
           mapToModel: true,
           model: Teacher,
@@ -253,21 +251,15 @@ export class UniversityService {
   }
 
   async getStudentByNameAndAcademicYear(
-    lastName: string,
-    firstName: string,
-    fullName: string,
     identityNumber: string,
     academicYear: string,
   ): Promise<Student> {
     try {
       const student = await this.sequelize.query(
-        'SP_GetStudentByNameAndAcademicYear @lastName=:lastName, @firstName=:firstName, @fullName=:fullName,@identityNumber=:identityNumber, @academicYear=:academicYear',
+        'SP_GetStudentByNameAndAcademicYear @identityNumber=:identityNumber, @academicYear=:academicYear',
         {
           type: QueryTypes.SELECT,
           replacements: {
-            lastName,
-            firstName,
-            fullName,
             identityNumber,
             academicYear,
           },
@@ -421,6 +413,39 @@ export class UniversityService {
           .reduce((acc: string, curr: string) => acc + curr, '');
         return JSON.parse(info);
       }
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async UpdateTeacher(id: string, updateTeacherDto?: UpdateTeacherDto) {
+    try {
+      const updated = await this.sequelize.query(
+        'SP_UpdateTeacherInformation @id=:id,@firstName=:firstName, @lastName=:lastName,@fullName=:fullName, @email=:email,' +
+          '@position=:position,@department=:department, @phoneNumber=:phoneNumber,@studentAmount=:studentAmount,@slug=:slug,' +
+          '@maximumStudentAmount=:maximumStudentAmount,@academicYear=:academicYear',
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            id,
+            firstName: updateTeacherDto.firstName?.trim() ?? null,
+            lastName: updateTeacherDto.lastName?.trim() ?? null,
+            fullName: updateTeacherDto.fullName?.trim() ?? null,
+            email: updateTeacherDto.email ?? null,
+            position: updateTeacherDto.position ?? null,
+            department: updateTeacherDto.department ?? null,
+            phoneNumber: updateTeacherDto.phoneNumber ?? null,
+            studentAmount: updateTeacherDto.studentAmount ?? null,
+            slug: updateTeacherDto.slug ?? null,
+            maximumStudentAmount: updateTeacherDto.maximumStudentAmount ?? null,
+            academicYear: updateTeacherDto.academicYear ?? null,
+          },
+          raw: true,
+          mapToModel: true,
+        },
+      );
+      return updated[0];
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

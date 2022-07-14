@@ -426,19 +426,58 @@ export class UniversityController {
           dto.internshipThirdGrade = student['Điểm 3'].toFixed(2);
           const checkStudent =
             await this.universityService.getStudentByNameAndAcademicYear(
-              dto.lastName,
-              dto.firstName,
-              dto.fullName,
               dto.identityNumber,
               dto.academicYear,
             );
           if (checkStudent) {
-            const result =
-              await this.universityService.UpdateStudentInformation(
+            const student =
+              await this.universityService.getStudentByIdForClient(
                 checkStudent.id,
-                { ...dto },
               );
-            return result;
+
+            if (Object.entries(student)[0] == undefined) {
+              throw new HttpException(
+                'This student does not exist in our system...',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (
+              dto.internshipFirstGrade < 0 ||
+              dto.internshipSecondGrade < 0 ||
+              dto.internshipThirdGrade < 0
+            ) {
+              throw new HttpException(
+                'Internship grade must be between 0 and 10',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (
+              dto.internshipFirstGrade > 10 ||
+              dto.internshipSecondGrade > 10 ||
+              dto.internshipThirdGrade > 10
+            ) {
+              throw new HttpException(
+                'Internship grade must be between 0 and 10',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (student.nameTeacher != '') {
+              dto.fullName =
+                dto.lastName?.concat('', dto.firstName?.toString()) || null;
+              dto.nameTeacher = student.nameTeacher;
+              const result =
+                await this.universityService.UpdateStudentInformation(
+                  student.id,
+                  dto,
+                );
+              return result;
+            } else {
+              dto.fullName =
+                dto.lastName?.concat('', dto.firstName?.toString()) || null;
+              const result =
+                await this.universityService.UpdateStudentInformation(
+                  checkStudent.id,
+                  dto,
+                );
+              return result;
+            }
           }
           const relevant = await this.universityService.addNewStudent({
             ...dto,
@@ -707,18 +746,55 @@ export class UniversityController {
           dto.maximumStudentAmount = teacher['Số lượng SV tối đa'];
           const checkTeacher =
             await this.universityService.getTeacherByNameAndAcademicYear(
-              dto.lastName,
-              dto.firstName,
               dto.fullName,
               dto.academicYear,
             );
           if (checkTeacher) {
-            const result =
-              await this.universityService.UpdateTeacherInformation(
-                checkTeacher.id,
-                { ...dto },
+            const temp: TeacherDetail =
+              await this.universityService.getTeacherById(checkTeacher.id);
+            if (Object.values(temp)[0][0] == undefined) {
+              throw new HttpException(
+                'This teacher does not exist in our system...',
+                HttpStatus.BAD_REQUEST,
               );
-            return result;
+            }
+            if (
+              dto.firstName != '' ||
+              dto.lastName != '' ||
+              dto.fullName != ''
+            ) {
+              if (temp.student[0] != undefined) {
+                console.log(temp.student[0]);
+                dto.fullName =
+                  dto.lastName
+                    ?.toString()
+                    .concat(' ', dto.firstName?.toString()) || '';
+                const result = await this.universityService.UpdateTeacher(
+                  checkTeacher.id,
+                  dto,
+                );
+                await Promise.all(
+                  temp.student.map(async (student) => {
+                    const studentId = student.id;
+                    await this.universityService.UpdateStudentInformation(
+                      studentId,
+                      {
+                        nameTeacher: dto.fullName,
+                      },
+                    );
+                  }),
+                );
+                return result;
+              } else {
+                dto.fullName =
+                  dto.lastName?.concat(' ', dto.firstName?.toString()) || '';
+                const result = await this.universityService.UpdateTeacher(
+                  checkTeacher.id,
+                  dto,
+                );
+                return result;
+              }
+            }
           }
           const relevant = await this.universityService.addNewTeacher({
             ...dto,
@@ -756,19 +832,60 @@ export class UniversityController {
 
           const checkStudent =
             await this.universityService.getStudentByNameAndAcademicYear(
-              student.lastName,
-              student.firstName,
-              student.fullName,
               student.identityNumber,
               student.academicYear,
             );
           if (checkStudent) {
-            const result =
-              await this.universityService.UpdateStudentInformation(
+            const student =
+              await this.universityService.getStudentByIdForClient(
                 checkStudent.id,
-                { ...student },
               );
-            return result;
+
+            if (Object.entries(student)[0] == undefined) {
+              throw new HttpException(
+                'This student does not exist in our system...',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (
+              student.internshipFirstGrade < 0 ||
+              student.internshipSecondGrade < 0 ||
+              student.internshipThirdGrade < 0
+            ) {
+              throw new HttpException(
+                'Internship grade must be between 0 and 10',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (
+              student.internshipFirstGrade > 10 ||
+              student.internshipSecondGrade > 10 ||
+              student.internshipThirdGrade > 10
+            ) {
+              throw new HttpException(
+                'Internship grade must be between 0 and 10',
+                HttpStatus.BAD_REQUEST,
+              );
+            } else if (student.nameTeacher != '') {
+              student.fullName =
+                student.lastName?.concat('', student.firstName?.toString()) ||
+                null;
+              student.nameTeacher = student.nameTeacher;
+              const result =
+                await this.universityService.UpdateStudentInformation(
+                  student.id,
+                  student,
+                );
+              return result;
+            } else {
+              student.fullName =
+                student.lastName?.concat('', student.firstName?.toString()) ||
+                null;
+              const result =
+                await this.universityService.UpdateStudentInformation(
+                  checkStudent.id,
+                  student,
+                );
+              return result;
+            }
           }
           const students = await this.universityService.addNewStudent(student);
           students.map(async (item) => {
@@ -804,18 +921,53 @@ export class UniversityController {
             teacher.lastName.concat(' ', teacher.firstName) || ' ';
           const checkTeacher =
             await this.universityService.getTeacherByNameAndAcademicYear(
-              teacher.lastName,
-              teacher.firstName,
               teacher.fullName,
               teacher.academicYear,
             );
           if (checkTeacher) {
-            const result =
-              await this.universityService.UpdateTeacherInformation(
-                checkTeacher.id,
-                { ...teacher },
+            const temp: TeacherDetail =
+              await this.universityService.getTeacherById(checkTeacher.id);
+            if (Object.values(temp)[0][0] == undefined) {
+              throw new HttpException(
+                'This teacher does not exist in our system...',
+                HttpStatus.BAD_REQUEST,
               );
-            return result;
+            }
+            if (
+              teacher.firstName != '' ||
+              teacher.lastName != '' ||
+              teacher.fullName != ''
+            ) {
+              if (temp.student != undefined) {
+                teacher.fullName =
+                  teacher.lastName
+                    ?.toString()
+                    .concat(' ', teacher.firstName?.toString()) || '';
+                const result = await this.universityService.UpdateTeacher(
+                  checkTeacher.id,
+                  teacher,
+                );
+                const studentId = temp.student[0].id;
+                await this.universityService.UpdateStudentInformation(
+                  studentId,
+                  {
+                    nameTeacher: teacher.fullName,
+                  },
+                );
+                return result;
+              } else {
+                teacher.fullName =
+                  teacher.lastName?.concat(
+                    ' ',
+                    teacher.firstName?.toString(),
+                  ) || '';
+                const result = await this.universityService.UpdateTeacher(
+                  checkTeacher.id,
+                  teacher,
+                );
+                return result;
+              }
+            }
           }
           const teachers = await this.universityService.addNewTeacher(teacher);
           teachers.map(async (item) => {
@@ -950,6 +1102,15 @@ export class UniversityController {
           'Internship grade must be between 0 and 10',
           HttpStatus.BAD_REQUEST,
         );
+      } else if (student.nameTeacher != '') {
+        dto.fullName =
+          dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
+        dto.nameTeacher = student.nameTeacher;
+        const result = await this.universityService.UpdateStudentInformation(
+          id,
+          dto,
+        );
+        return result;
       } else {
         dto.fullName =
           dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
@@ -984,7 +1145,7 @@ export class UniversityController {
         );
       }
       if (dto.firstName != '' || dto.lastName != '' || dto.fullName != '') {
-        if (teacher.student != undefined) {
+        if (teacher.student[0] != undefined) {
           dto.fullName =
             dto.lastName?.toString().concat(' ', dto.firstName?.toString()) ||
             '';
@@ -992,10 +1153,14 @@ export class UniversityController {
             id,
             dto,
           );
-          const studentId = teacher.student[0].id;
-          await this.universityService.UpdateStudentInformation(studentId, {
-            nameTeacher: dto.fullName,
-          });
+          await Promise.all(
+            teacher.student.map(async (student) => {
+              const studentId = student.id;
+              await this.universityService.UpdateStudentInformation(studentId, {
+                nameTeacher: dto.fullName,
+              });
+            }),
+          );
           return result;
         } else {
           dto.fullName =
@@ -1007,67 +1172,6 @@ export class UniversityController {
           return result;
         }
       }
-      // if (Object.values(teacher)[0][0].maximumStudentAmount == 0) {
-      //   if (dto.maximumStudentAmount > 0) {
-      //     if (
-      //       dto.maximumStudentAmount >
-      //       Object.values(teacher)[0][0].studentAmount
-      //     ) {
-      //       dto.fullName =
-      //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-      //       const result =
-      //         await this.universityService.UpdateTeacherInformation(id, dto);
-      //       return result;
-      //     } else if (
-      //       dto.maximumStudentAmount <
-      //       Object.values(teacher)[0][0].studentAmount
-      //         'The maximum student amount cannot be less than the current student amount...',
-      //     ) {
-      //       throw new HttpException(
-      //         HttpStatus.BAD_REQUEST,
-      //       );
-      //     }
-      //   } else if (dto.maximumStudentAmount <= 0) {
-      //     throw new HttpException(
-      //       'Maximum student amount must be greater than 0...',
-      //       HttpStatus.BAD_REQUEST,
-      //     );
-      //   }
-      // } else if (Object.values(teacher)[0][0].maximumStudentAmount > 0) {
-      //   if (dto.maximumStudentAmount > 0) {
-      //     if (
-      //       dto.maximumStudentAmount >
-      //       Object.values(teacher)[0][0].studentAmount
-      //     ) {
-      //       dto.fullName =
-      //         dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-      //       const result =
-      //         await this.universityService.UpdateTeacherInformation(id, dto);
-      //       return result;
-      //     } else if (
-      //       dto.maximumStudentAmount <
-      //       Object.values(teacher)[0][0].studentAmount
-      //     ) {
-      //       throw new HttpException(
-      //         'The maximum student amount cannot be less than the current student amount...',
-      //         HttpStatus.BAD_REQUEST,
-      //       );
-      //     }
-      //   } else if (dto.maximumStudentAmount < 0) {
-      //     throw new HttpException(
-      //       'Maximum student amount must be greater than 0...',
-      //       HttpStatus.BAD_REQUEST,
-      //     );
-      //   } else if ((dto.maximumStudentAmount = 0)) {
-      //     dto.fullName =
-      //       dto.lastName?.concat(' ', dto.firstName?.toString()) || null;
-      //     const result = await this.universityService.UpdateTeacherInformation(
-      //       id,
-      //       dto,
-      //     );
-      //     return result;
-      //   }
-      // }
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
